@@ -60,16 +60,24 @@ export default class login extends Vue {
   }
 
   async auth() {
-    if (this.model.phone.length != 12) {
+    if (this.model.number.length != 12) {
       return
     }
-    if (this.model.password.length >= 8) {
+    if (this.model.password.length < 8) {
+      return
+    }
+    if (this.model.password.length > 32) {
       return
     }
 
-    await this.$axios.post("/auth", this.model, {})
-      .then((response) = {
-
+    await this.$axios.post("http://localhost:8080/auth", this.model, {})
+      .then((response) => {
+        const jwt = response.data.access_token;
+        if (jwt) {
+          localStorage.setItem("access_token", jwt);
+          console.log("jwt token сохранён");
+          this.$router.push("../index.vue");
+        }
       })
   }
 
