@@ -111,7 +111,7 @@
                               outlined/>
               </div>
 
-              <div class="mt-5">
+              <div>
                 <v-text-field class="custom-input"
                               label="Repeat password"
                               type="password"
