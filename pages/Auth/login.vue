@@ -101,26 +101,37 @@ export default class login extends Vue {
     // По нажатию кнопки логина, мы валидируем форму,
     // Это сделано для того, чтобы пользователь не смог пустую форму отправить на логин
     // Если валидация успешна, мы пропускаем дальше, нет, ну иди заполняй форму
-    this.validateForm && await this.$axios.post("http://localhost:8080/auth", this.model, {})
+
+    // this.validateForm && await this.$axios.post("http://localhost:8080/auth", this.model, {})
+
       // Уточни, включен ли у него cors?
       // Иначе будет выдавать ошибку при запросе!
       // Если нет, то обрати внимание, как у него идут запросы.
       // Если у него запросы например http://localhost:8080/api/auth - имеют /api/
       // Проще будет сделать проксирование на запросы /api, и они сократятся до /api/auth, вместо полной строчки http...
-      .then((response) => {
-        const jwt = response.data.access_token;
-        if (jwt) {
-          localStorage.setItem("access_token", jwt);
-          console.log("jwt token сохранён");
-          this.$router.push("../index.vue");
-        }
-      })
-      .finally(() => {
-        this.loading = false;
-      })
+
+      // .then((response) => {
+      //   const jwt = response.data.access_token;
+      //   if (jwt) {
+      //     localStorage.setItem("access_token", jwt);
+      //     console.log("jwt token сохранён");
+      //     this.$router.push("../index.vue");
+      //   }
+      // })
+      // .finally(() => {
+      //   this.loading = false;
+      // })
+
+    this.loading = true
+
+    setTimeout(() => {
+      this.validateForm
+      this.loading = false
+    }, 1200)
+
 
     // На случай, если запрос не сработает, мы всё равно включаем форму обратно
-    this.loading = false;
+    // this.loading = false;
   }
 
   @Watch("model.phone")
