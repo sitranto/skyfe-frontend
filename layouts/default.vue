@@ -25,7 +25,7 @@
       <div v-if="getContentLoading">
         <div style="width: 360px; background-color: #fff;">
           <v-list dense color="transparent">
-            <v-list-item v-for="i in 15">
+            <v-list-item v-for="i in 15" :key="i">
 
               <!-- "элемент списка -->
               <div class="messageListItem__skeleton mb-3">
@@ -112,7 +112,8 @@ export default class Default extends Vue {
   checkUserLoading: boolean = true;
   getContentLoading: boolean = true;
 
-  dialogBranches: any = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  dialogBranches: any = [];
+  // dialogBranches: any = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
   selectedDialog: any = null;
   showMenu: boolean = false;
