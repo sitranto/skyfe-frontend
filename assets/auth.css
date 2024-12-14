@@ -11,6 +11,11 @@
   margin-top: 40px;
 }
 
+/* на странице регистрации у элемента делаю отступ меньше */
+.auth-actions.isRegPage {
+  margin-top: 15px;
+}
+
 .auth-button--outlined {
   font-size: 25px !important;
   letter-spacing: .3px !important;
@@ -32,12 +37,13 @@
 
 .v-text-field.v-text-field--outlined.custom-input label {
   color: #8A138C !important;
+  top: 15px !important;
   padding-inline: 10px !important;
   border-radius: 10px !important;
 }
 
-.v-text-field.v-input.custom-input {
-  border: 2px solid #8A138C;
+.v-text-field.v-input.custom-input .v-input__slot {
+  border: 2px solid #8A138C !important;
   border-radius: 30px !important;
   padding-left: 20px !important;
 }
