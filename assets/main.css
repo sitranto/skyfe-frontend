@@ -9,3 +9,18 @@ body, .body,
   padding: 0;
   margin: 0;
 }
+
+.body.fullWidth {
+  width: 100%;
+  height: calc(100vh - 300px);
+}
+
+.loadingCenter {
+  width: 100%;
+  height: calc(100vh - 100px);
+}
+
+/*  */
+.messageListItem-text__skeleton {
+  width: 270px;
+}
