@@ -21,7 +21,12 @@
                       label="Password"
                       type="password"
                       color="#8A138C"
-                      :rules="[rules.required, rules.password]"
+                      :rules="[
+                      rules.required,
+                      rules.password.rule,
+                      rules.password.minLength(8),
+                      rules.password.maxLength(32)
+                      ]"
                       :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showPass ? 'text' : 'password'"
                       @click:append="showPass = !showPass"
@@ -71,9 +76,15 @@ export default class login extends Vue {
     length: (len: any) => (v: any) =>
       (v || '').length >= (len ?? 8) ||
       `Недопустимая длина символов`,
-    password: (v: any) =>
+    password: {
+      rule: (v: any) =>
       !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
       'Пароль должен содержать заглавную букву, цифру и специальный символ.',
+      minLength: (len: any) => (v: any) =>
+        (v || '').length >= (len ?? 8) || `Пароль не может быть меньше ${len} символов`,
+      maxLength: (len: any) => (v: any) =>
+        (v || '').length <= (len ?? 8) || `Пароль не может быть больше ${len} символов`
+},
     required: (v: any) => !!v || 'Это поле обязательно к заполнению',
   }
 

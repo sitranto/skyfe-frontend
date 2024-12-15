@@ -104,7 +104,12 @@
                               type="password"
                               color="#8A138C"
                               v-model="model.password"
-                              :rules="[rules.required, rules.password]"
+                              :rules="[
+                              rules.required,
+                              rules.password.rule,
+                              rules.password.minLength(8),
+                              rules.password.maxLength(32)
+                              ]"
                               :append-icon="showPass.one ? 'mdi-eye' : 'mdi-eye-off'"
                               :type="showPass.one ? 'text' : 'password'"
                               @click:append="showPass.one = !showPass.one"
@@ -117,7 +122,13 @@
                               type="password"
                               color="#8A138C"
                               v-model="passRepeat"
-                              :rules="[rules.required, rules.password, rules.match(model.password)]"
+                              :rules="[
+                              rules.required,
+                              rules.password.rule,
+                              rules.password.minLength(8),
+                              rules.password.maxLength(32),
+                              rules.match(model.password)
+                              ]"
                               :append-icon="showPass.two ? 'mdi-eye' : 'mdi-eye-off'"
                               :type="showPass.two ? 'text' : 'password'"
                               @click:append="showPass.two = !showPass.two"
@@ -193,9 +204,15 @@ export default class reg extends Vue {
       (v || "") < len ||
       `Недопустимое значение, максимальное значение - ${len}`,
 
-    password: (v: any) =>
-      !!(v || "").match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
-      "Пароль должен содержать заглавную букву, цифру и специальный символ.",
+    password: {
+      rule: (v: any) =>
+        !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
+        'Пароль должен содержать заглавную букву, цифру и специальный символ.',
+      minLength: (len: any) => (v: any) =>
+        (v || '').length >= (len ?? 8) || `Пароль не может быть меньше ${len} символов`,
+      maxLength: (len: any) => (v: any) =>
+        (v || '').length <= (len ?? 8) || `Пароль не может быть больше ${len} символов`
+    },
 
     required: (v: any) => !!v || "Это поле обязательно к заполнению"
   };
