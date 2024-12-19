@@ -32,6 +32,7 @@
                 <div class="messageListItem-header__skeleton d-flex align-center">
                   <v-skeleton-loader type="avatar"/>
 
+                  <!-- todo исправить, почему не работает отображение -->
                   <div class="d-flex flex-column ml-2">
                     <v-skeleton-loader class="messageListItem-text__skeleton mt-2" type="text"/>
                     <v-skeleton-loader class="messageListItem-text__skeleton" type="sentences"/>
@@ -44,7 +45,7 @@
         </div>
       </div>
 
-      <div v-else>
+      <div class="d-flex flex-row" v-else>
         <!-- используем v-list для вывода диалогов -->
         <!-- color="transparent"-->
         <v-list v-if="dialogBranches.length" dense
@@ -77,7 +78,7 @@
         </div>
 
         <!-- Тут у нас активное окно с диалогом -->
-        <div>
+        <div class="px-2" style="width: calc(100% - 360px);">
           <Nuxt/>
         </div>
 
@@ -131,10 +132,10 @@ export default class Default extends Vue {
   }
 
   mounted() {
-    if (!(localStorage.getItem('accessToken'))) {
-      localStorage.removeItem('accessToken');
-      this.$router.push('/auth/login')
-    }
+    // if (!(localStorage.getItem('accessToken'))) {
+    //   localStorage.removeItem('accessToken');
+    //   this.$router.push('/auth/login')
+    // }
 
     setTimeout(() => {
       this.checkUserLoading = false;
