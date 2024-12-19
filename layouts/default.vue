@@ -54,13 +54,24 @@
             <!-- карточка диалога в списке диалогов -->
             <v-virtual-scroll
               :items="dialogBranches"
-              height="calc(100vh - 100px)"
-              item-height="64"
+              height="calc(100vh - 10px)"
+              item-height="70"
             >
               <template v-slot:default="{ item }">
-                <v-list-item>
-                  <div>
-                    <!-- <v-img src="" alt="#"/>-->
+                <v-list-item class="messageListBranch">
+                  <div class="messageListBranch__container d-flex align-center">
+
+                    <div class="messageListBranch__img">
+                      <img src="https://placehold.co/48x48" alt="img">
+                    </div>
+
+                    <div class="messageListBranch__body">
+                      <div class="messageListBranch__name">Имя пользователя</div>
+                      <div class="messageListBranch__text">
+                        Текст сообщения
+                      </div>
+                    </div>
+
                   </div>
                 </v-list-item>
               </template>
@@ -106,15 +117,16 @@
   </v-app>
 </template>
 <script lang="ts">
-import {Vue, Component} from 'vue-property-decorator';
+import {Vue, Component, Watch} from 'vue-property-decorator';
+import logger from "assets/scripts/logger";
 
 @Component({})
 export default class Default extends Vue {
   checkUserLoading: boolean = true;
   getContentLoading: boolean = true;
 
-  dialogBranches: any = [];
-  // dialogBranches: any = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  // dialogBranches: any = [];
+  dialogBranches: any = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
   selectedDialog: any = null;
   showMenu: boolean = false;
@@ -132,21 +144,57 @@ export default class Default extends Vue {
   }
 
   mounted() {
+    // 1. Проверяем авторизован ли человек
     if (!(localStorage.getItem('accessToken'))) {
       localStorage.removeItem('accessToken');
       this.$router.push('/auth/login')
     }
 
-      this.checkUserLoading = false;
+    this.checkUserLoading = false;
+
+    // 2. Смотрим текущую ссылку, если в ней выбран диалог, то смотрим какой
+    const currentRoute = this.$router.currentRoute.params.id
+
+    // тут мы получаем значение с нашей ссылки, после, ищем id (или то значение, по которому будет идентифицироваться
+    // выбранный диалог в ссылке)
+
+    // тут делаем запрос, смотрим, есть ли вообще этот диалог, и имеет ли доступ к нему пользователь?
+
+    // если всё гуд, то заносим его в переменную selectedDialog, и отображаем его в списке как выбранный
+    // если же нет, переносим его на '/' или всячески сообщаем пользователю, что у него нет доступа
+
 
     setTimeout(() => {
       this.getContentLoading = false;
-    }, 3000)
+    }, 1000)
+  }
+
+  // При изменении диалога, меняем страницу
+  @Watch('selectedDialog')
+  changeCurrentRouteMessageBranch() {
+    this.$router.push('/' + (this.dialogBranches[this.selectedDialog] ?? ''))
   }
 }
 </script>
 <style scoped>
+.messageListBranch__img img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
 
+.messageListBranch__body {
+  margin-left: 10px;
+}
 
+.messageListBranch__name {
+  font-size: 14px;
+}
 
+.messageListBranch__text {
+  font-size: 13px;
+  color: #8a8a8a !important;
+}
 </style>
+
