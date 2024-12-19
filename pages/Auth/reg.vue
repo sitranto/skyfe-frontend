@@ -185,6 +185,7 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Watch} from 'vue-property-decorator';
+import logger from "~/assets/scripts/logger";
 
 @Component({
   layout: "auth"
@@ -247,6 +248,7 @@ export default class reg extends Vue {
       },
       {})
       .then((response) => {
+        logger(response)
         if (response.data == "OK") {
           this.stepLoading = true
           this.nextStep()
@@ -256,9 +258,9 @@ export default class reg extends Vue {
         }
       })
       .catch((error) => {
-        console.log(error, {
-          message: "Ошибка запроса",
-        });
+        this.modalValue = "Ошибка запроса"
+        this.modal = true
+        logger(error)
       })
       .finally(() => {
         this.stepLoading = false
@@ -291,8 +293,10 @@ export default class reg extends Vue {
           this.modal = true
         }
       })
-      .catch((err) => {
-        console.log(err)
+      .catch((error) => {
+        this.modalValue = "Ошибка запроса"
+        this.modal = true
+        logger(error)
       })
       .finally(() => {
         this.stepLoading = false
@@ -318,8 +322,10 @@ export default class reg extends Vue {
           this.$router.push("/");
         }
       })
-      .catch((err) => {
-        console.log(err)
+      .catch((error) => {
+        this.modalValue = "Ошибка запроса"
+        this.modal = true
+        logger(error)
       })
       .finally(() => {
         this.stepLoading = false

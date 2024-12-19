@@ -20,6 +20,12 @@ import {Vue, Component} from 'vue-property-decorator';
 @Component({})
 export default class auth extends Vue {
 
+  mounted () {
+    if (localStorage.getItem('accessToken')) {
+      this.$router.push('/')
+    }
+  }
+
 }
 </script>
 <style scoped>

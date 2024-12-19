@@ -66,6 +66,7 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Watch} from 'vue-property-decorator';
+import logger from "~/assets/scripts/logger";
 
 @Component({
   layout: "auth"
@@ -115,10 +116,11 @@ export default class login extends Vue {
 
     this.validateForm && await this.$axios.post("/api/auth", this.model, {})
       .then((response) => {
+        logger(response.data.accessToken);
         const jwt: any = response.data.accessToken;
         if (jwt) {
           localStorage.setItem("accessToken", jwt);
-          //console.log("jwt token сохранён");
+          logger("jwt токен сохранён")
           this.$router.push("/");
         }
       })
@@ -145,7 +147,7 @@ export default class login extends Vue {
 
   @Watch("model.number")
   changeModelPhone() {
-    console.log(this.model.number)
+    logger(this.model.number)
     if (this.model.number.length <= 2) {
       return this.model.number = "+7"
     }

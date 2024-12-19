@@ -132,14 +132,12 @@ export default class Default extends Vue {
   }
 
   mounted() {
-    // if (!(localStorage.getItem('accessToken'))) {
-    //   localStorage.removeItem('accessToken');
-    //   this.$router.push('/auth/login')
-    // }
+    if (!(localStorage.getItem('accessToken'))) {
+      localStorage.removeItem('accessToken');
+      this.$router.push('/auth/login')
+    }
 
-    setTimeout(() => {
       this.checkUserLoading = false;
-    }, 1000)
 
     setTimeout(() => {
       this.getContentLoading = false;
