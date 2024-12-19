@@ -50,7 +50,17 @@
           <a class="auth-button--text" href="#" @click.prevent="$router.push(`/auth/reg`)">Создать аккаунт</a>
         </div>
       </div>
-      <div class="modal" v-show="modal" v-text="modalValue" style="border: 1px solid #d514dc"/>
+      <div class="modal" v-show="modal">
+        <v-alert
+          color="red"
+          dense
+          elevation="3"
+          outlined
+          prominent
+          type="error">
+          Неверно введены данные
+        </v-alert>
+      </div>
     </v-card>
   </v-form>
 </template>
@@ -71,7 +81,6 @@ export default class login extends Vue {
   }
 
   modal: boolean = false
-  modalValue: string = "Указаны неверные данные"
   modalTimer: number = 0
 
   /* rules отвечает за то, как правильно вбиты поля, исходя из них, форма становится валидной либо же нет */
@@ -104,12 +113,12 @@ export default class login extends Vue {
     // Это сделано для того, чтобы пользователь не смог пустую форму отправить на логин
     // Если валидация успешна, мы пропускаем дальше, нет, ну иди заполняй форму
 
-    this.validateForm && await this.$axios.post("/api/auth", this.model , {})
+    this.validateForm && await this.$axios.post("/api/auth", this.model, {})
       .then((response) => {
         const jwt: any = response.data.accessToken;
         if (jwt) {
           localStorage.setItem("accessToken", jwt);
-          console.log("jwt token сохранён");
+          //console.log("jwt token сохранён");
           this.$router.push("/");
         }
       })
@@ -129,12 +138,6 @@ export default class login extends Vue {
       })
 
     this.loading = true
-
-    setTimeout(() => {
-      this.validateForm
-      this.loading = false
-    }, 1200)
-
 
     // На случай, если запрос не сработает, мы всё равно включаем форму обратно
     this.loading = false;

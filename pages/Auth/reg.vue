@@ -45,7 +45,7 @@
               <div class="mt-5">
                 <v-text-field class="custom-input"
                               label="First name"
-                              v-model="model.firstname"
+                              v-model="model.firstName"
                               :rules="[rules.required]"
                               type="text"
                               outlined/>
@@ -54,7 +54,7 @@
               <div>
                 <v-text-field class="custom-input"
                               label="Second name"
-                              v-model="model.secondname"
+                              v-model="model.lastName"
                               :rules="[rules.required]"
                               type="text"
                               outlined/>
@@ -136,6 +136,16 @@
               </div>
 
               <v-card-actions class="d-flex justify-center">
+
+                <v-btn
+                  @click="stepper--"
+                  class="d-block text-none auth-button--outlined mt-5 px-7"
+                  outlined
+                  color="#8A138C"
+                  height="45px">
+                  Назад
+                </v-btn>
+
                 <v-btn
                   @click="registration"
                   class="d-block text-none auth-button--outlined mt-5 px-7"
@@ -158,6 +168,19 @@
         <a class="auth-button--text" href="#" @click.prevent="$router.push(`/auth/login`)">Войти</a>
       </div>
     </div>
+
+    <div class="modal" v-show="modal">
+      <v-alert
+        color="red"
+        dense
+        elevation="3"
+        outlined
+        prominent
+        type="error">
+        {{modalValue}}
+      </v-alert>
+    </div>
+
   </div>
 </template>
 <script lang="ts">
@@ -170,7 +193,7 @@ export default class reg extends Vue {
   model: any = {
     number: "+7",
     firstName: "",
-    secondName: "",
+    lastName: "",
     username: "",
     password: ""
   }
@@ -191,6 +214,10 @@ export default class reg extends Vue {
   stepLoading: boolean = false
   stepper: number = 1
 
+  modal: boolean = false
+  modalValue: string = ""
+  modalTimer: number = 0
+
 
   rules = {
     match: (match: any) => (v: any) =>
@@ -201,9 +228,9 @@ export default class reg extends Vue {
       `Недопустимая длина символов`,
 
     password: {
-     /* rule: (v: any) =>
-        !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
-        'Пароль должен содержать заглавную букву, цифру и специальный символ.',*/
+      /* rule: (v: any) =>
+         !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
+         'Пароль должен содержать заглавную букву, цифру и специальный символ.',*/
       minLength: (len: any) => (v: any) =>
         (v || '').length >= (len ?? 8) || `Пароль не может быть меньше ${len} символов`,
       maxLength: (len: any) => (v: any) =>
@@ -215,12 +242,17 @@ export default class reg extends Vue {
 
   async checkPhoneAndCont() {
 
-    this.validateForm(`validFormOne`) && await this.$axios.post("/number", this.model.number , {})
+    this.validateForm(`validFormOne`) && await this.$axios.post("/api/user/number", {
+        number: this.model.number
+      },
+      {})
       .then((response) => {
-        if (response.status == 200) {
+        if (response.data == "OK") {
           this.stepLoading = true
+          this.nextStep()
         } else {
-
+          this.modalValue = "Такой номер телефона уже используется"
+          this.modal = true
         }
       })
       .catch((error) => {
@@ -228,50 +260,78 @@ export default class reg extends Vue {
           message: "Ошибка запроса",
         });
       })
-
-    setTimeout(() => {
-      this.validateForm('validFormOne')
-      this.stepLoading = false
-    }, 1200)
-
-    setTimeout(() => {
-      if (this.validateForm('validFormOne')) this.nextStep()
-    }, 1000)
+      .finally(() => {
+        this.stepLoading = false
+        let interval = setInterval(() => {
+          this.modalTimer += 1
+          if (this.modalTimer >= 5) {
+            this.modal = false
+            this.modalValue = ""
+            clearInterval(interval)
+            this.modalTimer = 0
+          }
+        }, 1000)
+      })
 
   }
 
   async checkUserNameAndCont() {
 
-    this.validateForm(`validFormTwo`) && await this.$axios.post("/auth/user", this.model.username , {})
+    this.validateForm(`validFormTwo`) && await this.$axios.post("/api/user/username",
+      {
+        username: this.model.username
+      },
+      {})
       .then((response) => {
-        this.stepLoading = true
+        if (response.data == "OK") {
+          this.stepLoading = true
+          this.nextStep()
+        } else {
+          this.modalValue = "Такой username уже используется"
+          this.modal = true
+        }
       })
       .catch((err) => {
         console.log(err)
       })
-
-    setTimeout(() => {
-      this.validateForm('validFormTwo')
-      this.stepLoading = false
-    }, 1200)
-
-    setTimeout(() => {
-      if (this.validateForm('validFormTwo')) this.nextStep()
-    }, 1000)
+      .finally(() => {
+        this.stepLoading = false
+        let interval = setInterval(() => {
+          this.modalTimer += 1
+          if (this.modalTimer >= 5) {
+            this.modal = false
+            clearInterval(interval)
+            this.modalTimer = 0
+          }
+        }, 1000)
+      })
   }
 
   async registration() {
 
-    this.validateForm(`validFormTwo`) && await this.$axios.post("/auth/user", this.model , {})
+    this.validateForm(`validFormThree`) && await this.$axios.post("/api/user", this.model, {})
       .then((response) => {
-        this.stepLoading = true
+        const jwt: any = response.data.accessToken;
+        if (jwt) {
+          localStorage.setItem("accessToken", jwt);
+          console.log("jwt token сохранён");
+          this.$router.push("/");
+        }
       })
-
-    setTimeout(() => {
-      this.validateForm('validFormThree')
-      this.stepLoading = false
-    }, 1200)
-
+      .catch((err) => {
+        console.log(err)
+      })
+      .finally(() => {
+        this.stepLoading = false
+        let interval = setInterval(() => {
+          this.modalTimer += 1
+          if (this.modalTimer >= 5) {
+            this.modal = false
+            clearInterval(interval)
+            this.modalTimer = 0
+          }
+        }, 1000)
+      })
   }
 
   nextStep() {
