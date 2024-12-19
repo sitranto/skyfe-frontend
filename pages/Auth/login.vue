@@ -56,7 +56,6 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Watch} from 'vue-property-decorator';
-import * as string_decoder from "node:string_decoder";
 
 @Component({
   layout: "auth"
@@ -106,19 +105,12 @@ export default class login extends Vue {
     // Если валидация успешна, мы пропускаем дальше, нет, ну иди заполняй форму
 
     this.validateForm && await this.$axios.post("/api/auth", this.model , {})
-
-      // Уточни, включен ли у него cors?
-      // Иначе будет выдавать ошибку при запросе!
-      // Если нет, то обрати внимание, как у него идут запросы.
-      // Если у него запросы например http://localhost:8080/api/auth - имеют /api/
-      // Проще будет сделать проксирование на запросы /api, и они сократятся до /api/auth, вместо полной строчки http...
-
       .then((response) => {
         const jwt: any = response.data.accessToken;
         if (jwt) {
           localStorage.setItem("accessToken", jwt);
           console.log("jwt token сохранён");
-          this.$router.push("../index.vue");
+          this.$router.push("/");
         }
       })
       .catch(() => {
@@ -145,7 +137,7 @@ export default class login extends Vue {
 
 
     // На случай, если запрос не сработает, мы всё равно включаем форму обратно
-    // this.loading = false;
+    this.loading = false;
   }
 
   @Watch("model.number")

@@ -215,16 +215,18 @@ export default class reg extends Vue {
 
   async checkPhoneAndCont() {
 
-    this.validateForm(`validFormOne`) && await this.$axios.post("/auth/user", this.model.number , {})
+    this.validateForm(`validFormOne`) && await this.$axios.post("/number", this.model.number , {})
       .then((response) => {
-        if (response.message == "Number already exists") {
-          console.log("Number already exists");
-        } else {
+        if (response.status == 200) {
           this.stepLoading = true
+        } else {
+
         }
       })
       .catch((error) => {
-
+        console.log(error, {
+          message: "Ошибка запроса",
+        });
       })
 
     setTimeout(() => {
@@ -238,8 +240,15 @@ export default class reg extends Vue {
 
   }
 
-  checkUserNameAndCont() {
-    this.stepLoading = true
+  async checkUserNameAndCont() {
+
+    this.validateForm(`validFormTwo`) && await this.$axios.post("/auth/user", this.model.username , {})
+      .then((response) => {
+        this.stepLoading = true
+      })
+      .catch((err) => {
+        console.log(err)
+      })
 
     setTimeout(() => {
       this.validateForm('validFormTwo')
@@ -251,8 +260,12 @@ export default class reg extends Vue {
     }, 1000)
   }
 
-  registration() {
-    this.stepLoading = true
+  async registration() {
+
+    this.validateForm(`validFormTwo`) && await this.$axios.post("/auth/user", this.model , {})
+      .then((response) => {
+        this.stepLoading = true
+      })
 
     setTimeout(() => {
       this.validateForm('validFormThree')

@@ -132,6 +132,7 @@ export default class Default extends Vue {
 
   mounted() {
     if (!(localStorage.getItem('accessToken'))) {
+      localStorage.removeItem('accessToken');
       this.$router.push('/auth/login')
     }
 
@@ -146,5 +147,7 @@ export default class Default extends Vue {
 }
 </script>
 <style scoped>
+
+
 
 </style>
