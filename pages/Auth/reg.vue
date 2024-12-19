@@ -16,7 +16,7 @@
               <div class="mt-5">
                 <v-text-field class="custom-input"
                               v-mask="`+7##########`"
-                              v-model="model.phone"
+                              v-model="model.number"
                               label="Phone"
                               type="text"
                               :rules="[rules.required, rules.length(12)]"
@@ -106,7 +106,7 @@
                               v-model="model.password"
                               :rules="[
                               rules.required,
-                              rules.password.rule,
+                              /*rules.password.rule,*/
                               rules.password.minLength(8),
                               rules.password.maxLength(32)
                               ]"
@@ -124,7 +124,7 @@
                               v-model="passRepeat"
                               :rules="[
                               rules.required,
-                              rules.password.rule,
+                              /*rules.password.rule,*/
                               rules.password.minLength(8),
                               rules.password.maxLength(32),
                               rules.match(model.password)
@@ -168,9 +168,9 @@ import {Vue, Component, Watch} from 'vue-property-decorator';
 })
 export default class reg extends Vue {
   model: any = {
-    phone: "+7",
-    firstname: "",
-    secondname: "",
+    number: "+7",
+    firstName: "",
+    secondName: "",
     username: "",
     password: ""
   }
@@ -200,14 +200,10 @@ export default class reg extends Vue {
       (v || "").length >= (len ?? 8) ||
       `Недопустимая длина символов`,
 
-    maxValue: (len: any) => (v: any) =>
-      (v || "") < len ||
-      `Недопустимое значение, максимальное значение - ${len}`,
-
     password: {
-      rule: (v: any) =>
+     /* rule: (v: any) =>
         !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
-        'Пароль должен содержать заглавную букву, цифру и специальный символ.',
+        'Пароль должен содержать заглавную букву, цифру и специальный символ.',*/
       minLength: (len: any) => (v: any) =>
         (v || '').length >= (len ?? 8) || `Пароль не может быть меньше ${len} символов`,
       maxLength: (len: any) => (v: any) =>
@@ -217,8 +213,19 @@ export default class reg extends Vue {
     required: (v: any) => !!v || "Это поле обязательно к заполнению"
   };
 
-  checkPhoneAndCont() {
-    this.stepLoading = true
+  async checkPhoneAndCont() {
+
+    this.validateForm(`validFormOne`) && await this.$axios.post("/auth/user", this.model.number , {})
+      .then((response) => {
+        if (response.message == "Number already exists") {
+          console.log("Number already exists");
+        } else {
+          this.stepLoading = true
+        }
+      })
+      .catch((error) => {
+
+      })
 
     setTimeout(() => {
       this.validateForm('validFormOne')
@@ -258,10 +265,10 @@ export default class reg extends Vue {
     return this.stepper++;
   }
 
-  @Watch("model.phone")
+  @Watch("model.number")
   changeModelPhone() {
-    if (this.model.phone.length <= 2) {
-      return this.model.phone = "+7"
+    if (this.model.number.length <= 2) {
+      return this.model.number = "+7"
     }
   }
 

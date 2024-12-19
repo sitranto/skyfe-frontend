@@ -131,6 +131,10 @@ export default class Default extends Vue {
   }
 
   mounted() {
+    if (!(localStorage.getItem('accessToken'))) {
+      this.$router.push('/auth/login')
+    }
+
     setTimeout(() => {
       this.checkUserLoading = false;
     }, 1000)
@@ -139,7 +143,6 @@ export default class Default extends Vue {
       this.getContentLoading = false;
     }, 3000)
   }
-
 }
 </script>
 <style scoped>

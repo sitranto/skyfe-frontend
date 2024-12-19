@@ -10,7 +10,7 @@
         <v-text-field class="custom-input"
                       label="Phone"
                       type="text"
-                      v-model="model.phone"
+                      v-model="model.number"
                       v-mask="`+7##########`"
                       :rules="[rules.required, rules.length(12)]"
                       outlined/>
@@ -23,7 +23,7 @@
                       color="#8A138C"
                       :rules="[
                       rules.required,
-                      rules.password.rule,
+                      //rules.password.rule,
                       rules.password.minLength(8),
                       rules.password.maxLength(32)
                       ]"
@@ -49,8 +49,8 @@
         <div class="mt-2">
           <a class="auth-button--text" href="#" @click.prevent="$router.push(`/auth/reg`)">Создать аккаунт</a>
         </div>
-
       </div>
+      <div class="modal" v-show="modal" v-text="modalValue" style="border: 1px solid #d514dc"/>
     </v-card>
   </v-form>
 </template>
@@ -67,9 +67,13 @@ export default class login extends Vue {
   showPass: boolean = false;
 
   model: any = {
-    phone: "+7",
+    number: "+7",
     password: ""
   }
+
+  modal: boolean = false
+  modalValue: string = "Указаны неверные данные"
+  modalTimer: number = 0
 
   /* rules отвечает за то, как правильно вбиты поля, исходя из них, форма становится валидной либо же нет */
   rules = {
@@ -77,14 +81,14 @@ export default class login extends Vue {
       (v || '').length >= (len ?? 8) ||
       `Недопустимая длина символов`,
     password: {
-      rule: (v: any) =>
-      !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
-      'Пароль должен содержать заглавную букву, цифру и специальный символ.',
+      /* rule: (v: any) =>
+       !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
+       'Пароль должен содержать заглавную букву, цифру и специальный символ.',*/
       minLength: (len: any) => (v: any) =>
         (v || '').length >= (len ?? 8) || `Пароль не может быть меньше ${len} символов`,
       maxLength: (len: any) => (v: any) =>
         (v || '').length <= (len ?? 8) || `Пароль не может быть больше ${len} символов`
-},
+    },
     required: (v: any) => !!v || 'Это поле обязательно к заполнению',
   }
 
@@ -95,25 +99,13 @@ export default class login extends Vue {
     // и тут
     // https://v2.vuetifyjs.com/en/components/forms/#rules
 
-
-    // if (this.model.number.length != 12) {
-    //   return
-    // }
-    // if (this.model.password.length < 8) {
-    //   return
-    // }
-    // if (this.model.password.length > 32) {
-    //   return
-    // }
-
-
     this.loading = true;
 
     // По нажатию кнопки логина, мы валидируем форму,
     // Это сделано для того, чтобы пользователь не смог пустую форму отправить на логин
     // Если валидация успешна, мы пропускаем дальше, нет, ну иди заполняй форму
 
-    // this.validateForm && await this.$axios.post("http://localhost:8080/auth", this.model, {})
+    this.validateForm && await this.$axios.post("/api/auth", this.model , {})
 
       // Уточни, включен ли у него cors?
       // Иначе будет выдавать ошибку при запросе!
@@ -121,17 +113,28 @@ export default class login extends Vue {
       // Если у него запросы например http://localhost:8080/api/auth - имеют /api/
       // Проще будет сделать проксирование на запросы /api, и они сократятся до /api/auth, вместо полной строчки http...
 
-      // .then((response) => {
-      //   const jwt = response.data.access_token;
-      //   if (jwt) {
-      //     localStorage.setItem("access_token", jwt);
-      //     console.log("jwt token сохранён");
-      //     this.$router.push("../index.vue");
-      //   }
-      // })
-      // .finally(() => {
-      //   this.loading = false;
-      // })
+      .then((response) => {
+        const jwt: any = response.data.accessToken;
+        if (jwt) {
+          localStorage.setItem("accessToken", jwt);
+          console.log("jwt token сохранён");
+          this.$router.push("../index.vue");
+        }
+      })
+      .catch(() => {
+        this.modal = true
+      })
+      .finally(() => {
+        this.loading = false;
+        let interval = setInterval(() => {
+          this.modalTimer += 1
+          if (this.modalTimer >= 5) {
+            this.modal = false
+            clearInterval(interval)
+            this.modalTimer = 0
+          }
+        }, 1000)
+      })
 
     this.loading = true
 
@@ -145,11 +148,11 @@ export default class login extends Vue {
     // this.loading = false;
   }
 
-  @Watch("model.phone")
+  @Watch("model.number")
   changeModelPhone() {
-    console.log(this.model.phone)
-    if (this.model.phone.length <= 2) {
-      return this.model.phone = "+7"
+    console.log(this.model.number)
+    if (this.model.number.length <= 2) {
+      return this.model.number = "+7"
     }
   }
 
