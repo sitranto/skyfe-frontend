@@ -62,7 +62,7 @@
                   <div class="messageListBranch__container d-flex align-center">
 
                     <div class="messageListBranch__img">
-                      <img src="https://placeholder.co/48x48" alt="img">
+                      <img src="https://placehold.co/48x48" alt="img">
                     </div>
 
                     <div class="messageListBranch__body">
@@ -149,7 +149,7 @@ export default class Default extends Vue {
     // 1. Проверяем авторизован ли человек
     if (!(localStorage.getItem('accessToken'))) {
       localStorage.removeItem('accessToken');
-      this.$router.push('/auth/login')
+      await this.$router.push('/auth/login')
     }
 
     await this.$axios.get("/api/chat", {
