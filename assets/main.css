@@ -20,7 +20,7 @@ body, .body,
   height: calc(100vh - 100px);
 }
 
-/*  */
-/*.messageListItem-text__skeleton {*/
-/*  width: 270px;*/
-/*}*/
+/*
+.messageListItem-text__skeleton {
+  width: 270px;
+} */

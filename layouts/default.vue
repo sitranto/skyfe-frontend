@@ -62,14 +62,12 @@
                   <div class="messageListBranch__container d-flex align-center">
 
                     <div class="messageListBranch__img">
-                      <img src="https://placehold.co/48x48" alt="img">
+                      <img src="https://placeholder.co/48x48" alt="img">
                     </div>
 
                     <div class="messageListBranch__body">
-                      <div class="messageListBranch__name">Имя пользователя</div>
-                      <div class="messageListBranch__text">
-                        Текст сообщения
-                      </div>
+                      <div class="messageListBranch__name" v-text="item.partnerName" />
+                      <div class="messageListBranch__text" v-html="item.lastMessageContent" />
                     </div>
 
                   </div>
@@ -117,16 +115,20 @@
   </v-app>
 </template>
 <script lang="ts">
-import {Vue, Component, Watch} from 'vue-property-decorator';
+import {Vue, Component, Watch, Provide} from 'vue-property-decorator';
 import logger from "assets/scripts/logger";
 
-@Component({})
+@Component({
+
+})
 export default class Default extends Vue {
   checkUserLoading: boolean = true;
   getContentLoading: boolean = true;
 
   // dialogBranches: any = [];
-  dialogBranches: any = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+  dialogBranches: any = []
+
+  @Provide() chatId: number = this.selectedDialog
 
   selectedDialog: any = null;
   showMenu: boolean = false;
@@ -143,12 +145,25 @@ export default class Default extends Vue {
     })
   }
 
-  mounted() {
+  async mounted() {
     // 1. Проверяем авторизован ли человек
     if (!(localStorage.getItem('accessToken'))) {
       localStorage.removeItem('accessToken');
       this.$router.push('/auth/login')
     }
+
+    await this.$axios.get("/api/chat", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+      }
+    })
+      .then((response) => {
+        this.dialogBranches = response.data
+        logger(this.dialogBranches)
+      })
+      .catch((error) =>{
+        logger(error)
+      })
 
     this.checkUserLoading = false;
 

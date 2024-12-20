@@ -66,6 +66,7 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Watch} from 'vue-property-decorator';
+// @ts-ignore
 import logger from "~/assets/scripts/logger";
 
 @Component({
