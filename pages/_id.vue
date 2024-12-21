@@ -30,7 +30,7 @@
 
 
       <!-- Информация о пользователе  -->
-      <div class="white" style="height: 60px">
+      <div class="white shadow--info" style="height: 60px">
         Инфо про юзера
       </div>
 
@@ -123,7 +123,7 @@ export default class _id extends Vue {
 
   async sendMessage() {
     let status = false
-    await this.$axios.post("/api/message/send/", {
+    await this.$axios.post("/api/message/send", {
         content: this.message
       },
       {
@@ -156,7 +156,7 @@ export default class _id extends Vue {
   // Тут подставляются стили для сообщений, в зависимости от того, кто сообщение отправил, текущий пользователь или собеседник
   whoIsUser(id: number) {
     // Получаем id пользователя
-    return this.ownerId == id ? {
+    return this.chatId == id ? {
       color: 'white',
       class: 'message-isOwner align-self-end black--text'
     } : {
@@ -208,6 +208,12 @@ export default class _id extends Vue {
   top: 0; /* прикрепить к верху */
   z-index: 1000;
   margin: 0 !important;
+}
+
+.shadow--info {
+  box-shadow: -2px 10px 19px -12px rgba(0,0,0,1);
+  -webkit-box-shadow: -2px 10px 19px -12px rgba(0,0,0,1);
+  -moz-box-shadow: -2px 10px 19px -12px rgba(0,0,0,1);
 }
 
 .message {

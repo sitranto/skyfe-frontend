@@ -50,6 +50,7 @@
         <!-- color="transparent"-->
         <v-list v-if="dialogBranches.length" dense
                 style="width: 360px; height: 100vh; background-color: white">
+          <button-menu class="mb-2"/>
           <v-list-item-group v-model="selectedDialog"
                              color="primary">
             <!-- virtual scroll в v-for не нуждается, -->
@@ -82,11 +83,14 @@
         </v-list>
 
         <!-- Тут мы выводим разметку, в случае если диалогов не будет -->
-        <div v-else class="d-flex justify-center align-center"
+        <div v-else>
+        <button-menu/>
+        <div class="d-flex justify-center align-center"
              style="width: 360px; height: 100vh; background-color: white">
           <div>
             Нет диалогов
           </div>
+        </div>
         </div>
 
         <!-- Тут у нас активное окно с диалогом -->
@@ -141,11 +145,17 @@
 <script lang="ts">
 import {Vue, Component, Watch, Provide} from 'vue-property-decorator';
 import logger from "assets/scripts/logger";
+import buttonMenu from "~/components/buttonMenu.vue";
+import {reactive} from "vue";
 
-@Component({})
+@Component({
+  components: {
+    buttonMenu,
+  }
+})
 export default class Default extends Vue {
   // Id текущего чата
-  @Provide() chatId: number | null | undefined
+  @Provide() chatId = reactive({ value: Number });
 
   // Все наши диалоги
   dialogBranches: any = []
@@ -190,18 +200,23 @@ export default class Default extends Vue {
 
   async getChatList() {
     // Проходим дальше, делаем запрос на
-    await this.$axios.get("/api/chat/", {
+    await this.$axios.get("/api/chat", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`
       }
     })
       // если запрос отработал штатно
       .then((response) => {
+        if (response.status == 403) {
+          localStorage.removeItem('accessToken')
+          this.$router.push('/auth/login')
+        }
         this.dialogBranches = response.data
         logger(this.dialogBranches)
       })
       // в случае, если у нас ошибка
       .catch((error) => {
+        logger(`Bearer ${localStorage.getItem('accessToken')}`)
         logger(error)
       })
       // в независимости от исхода запроса, убираем анимацию загрузки
@@ -210,13 +225,13 @@ export default class Default extends Vue {
         this.getContentLoading = false;
 
 
-        // Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
-        this.dialogBranches = [
-          {
-            partnerName: 'KekV',
-            lastMessageContent: 'last message...',
-          }
-        ]
+         // Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
+         this.dialogBranches = [
+           {
+             partnerName: 'KekV',
+             lastMessageContent: 'last message...',
+           }
+         ]
 
       })
   }
@@ -241,6 +256,7 @@ export default class Default extends Vue {
     }
 
     // передаём значение в качестве числа
+    //return this.chatId = +currentRoute
     return this.chatId = +currentRoute
 
   }

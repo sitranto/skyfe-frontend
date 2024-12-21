@@ -114,7 +114,7 @@ export default class login extends Vue {
     // По нажатию кнопки логина, мы валидируем форму,
     // Это сделано для того, чтобы пользователь не смог пустую форму отправить на логин
     // Если валидация успешна, мы пропускаем дальше, нет, ну иди заполняй форму
-
+    logger(this.model);
     this.validateForm && await this.$axios.post("/api/auth", this.model, {})
       .then((response) => {
         logger(response.data.accessToken);
