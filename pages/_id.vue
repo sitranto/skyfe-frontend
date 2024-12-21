@@ -1,5 +1,5 @@
 <template>
-  <div class="chat__container ">
+  <div class="chat__container">
 
     <div v-if="loadMessages">
       <v-skeleton-loader class="skeleton-chat" elevation="0">
@@ -26,46 +26,54 @@
       </v-skeleton-loader>
     </div>
 
-    <div v-else>
-      <!-- тут показываем сообщения, которые есть -->
-      <div class="d-flex flex-column" v-if="messages.length">
-        <v-card v-for="(item, i) in messages" :key="i"
-                width="fit-content"
-                max-width="500px"
-                :class="'message px-2 py-1 mb-4 ' + whoIsUser(item.userId).class"
-                :color="whoIsUser(item.userId).color">
-          <div class="message-container">
-            {{ item.text }}
-          </div>
-        </v-card>
+    <div class="d-flex flex-column" v-else style="height: 100vh">
+
+
+      <!-- Информация о пользователе  -->
+      <div class="white" style="height: 60px">
+        Инфо про юзера
       </div>
 
-      <div v-else>
-        Разметка, в случае если сообщений с пользователем нету
+
+      <!-- Диалог -->
+      <div class="mx-10 mt-2 mb-4"
+           style="flex: 1 0 auto; overflow-y: auto; height: calc(100vh - 148px)">
+
+        <!-- тут показываем сообщения, которые есть -->
+        <div class="d-flex flex-column" v-if="messages.length">
+          <v-card v-for="(item, i) in messages" :key="i"
+                  width="fit-content"
+                  max-width="500px"
+                  :class="'message px-2 py-1 mb-4 ' + whoIsUser(item.userId).class"
+                  :color="whoIsUser(item.userId).color">
+            <div class="message-container">
+              {{ item.text }}
+            </div>
+          </v-card>
+        </div>
+
+        <!-- Сообщений нету -->
+        <div class="d-flex justify-center align-center" style="height: inherit" v-else>
+          <div>Сообщений с пользователем нету</div>
+        </div>
       </div>
 
-      <div style="bottom: 0 !important">
-        <v-card-actions
-          class="d-flex justify-center align-center position-absolute"
-          style="width: 70%; margin: 0 auto; padding: 20px 0; bottom: 0 !important;">
 
-          <v-text-field
-            class="custom-input"
-            label="Сообщение"
-            placeholder="Введите сообщение"
-            type="text"
-            v-model="message"
-            outlined
-            style="flex-grow: 1; margin-right: 8px; top: 15px"
-          />
-
-          <v-btn
-            fab
-            dark
-            color="#8A138C"
-            @click="sendMessage"
-            @refreshItems="initMessages"
-          >
+      <!-- Инпут группа -->
+      <div class="mx-10 pb-2">
+        <v-card-actions class="d-flex justify-center align-center ma-0 pa-0">
+          <v-text-field class="custom-input pa-0 ma-0"
+                        placeholder="Введите сообщение"
+                        v-model="message"
+                        label="Сообщение"
+                        type="text"
+                        hide-details
+                        outlined/>
+          <v-btn class="ma-0 pa-0 ml-3"
+                 color="#8A138C"
+                 dark
+                 fab
+                 @click="sendMessageAndRefresh">
             <v-icon dark>
               mdi-send
             </v-icon>
@@ -78,49 +86,65 @@
 </template>
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
+import logger from "assets/scripts/logger";
 
 @Component({})
 export default class _id extends Vue {
+  @Inject() chatId!: number | null | undefined
   loadMessages: boolean = true
 
+  messages: any = [];
   message: string = ""
 
-  @Inject () chatId!: number
-
-  messages: any = []
+  // mounted всегда наверх
+  async mounted() {
+    await this.initMessages()
+    logger('chat id is: ', this.chatId)
+  }
 
   async initMessages() {
-    await this.$axios.get("/api/message", {
+    await this.$axios.get("/api/message/", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         chatId: this.chatId
       }
     })
       .then((response) => {
-        logger(response)
         this.messages = response.data
+        logger(response)
       })
       .catch((error) => {
         logger(error)
       })
-  }
-
-  async mounted() {
-    this.initMessages()
-
-    setTimeout(() => {
-      this.loadMessages = false
-    }, 1000)
+      .finally(() => {
+        this.loadMessages = false
+      })
   }
 
   async sendMessage() {
-    await this.$axios.post("/api/message/send", {
+    let status = false
+    await this.$axios.post("/api/message/send/", {
         content: this.message
       },
       {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        chatId: this.chatId
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          chatId: this.chatId
+        }
       })
+      .then((response) => {
+        status = true
+      })
+      .catch((error) => {
+        status = false
+        logger(error)
+      })
+
+    return status
+  }
+
+  async sendMessageAndRefresh() {
+    if (await this.sendMessage()) await this.initMessages()
   }
 
   // Генерация ширины Skeleton сообщений
@@ -131,6 +155,7 @@ export default class _id extends Vue {
 
   // Тут подставляются стили для сообщений, в зависимости от того, кто сообщение отправил, текущий пользователь или собеседник
   whoIsUser(id: number) {
+    // Получаем id пользователя
     return this.ownerId == id ? {
       color: 'white',
       class: 'message-isOwner align-self-end black--text'
@@ -142,9 +167,7 @@ export default class _id extends Vue {
 }
 
 </script>
-
 <style>
-
 .skeleton-chat {
   display: flex;
   flex-direction: column;

@@ -50,14 +50,17 @@
         <!-- color="transparent"-->
         <v-list v-if="dialogBranches.length" dense
                 style="width: 360px; height: 100vh; background-color: white">
-          <v-list-item-group v-model="selectedDialog" color="primary">
-            <!-- карточка диалога в списке диалогов -->
+          <v-list-item-group v-model="selectedDialog"
+                             color="primary">
+            <!-- virtual scroll в v-for не нуждается, -->
+            <!-- т.к. атрибут items получает массив, и н сам его перебирает -->
             <v-virtual-scroll
               :items="dialogBranches"
               height="calc(100vh - 10px)"
               item-height="70"
             >
               <template v-slot:default="{ item }">
+                <!-- карточка диалога в списке диалогов -->
                 <v-list-item class="messageListBranch">
                   <div class="messageListBranch__container d-flex align-center">
 
@@ -66,8 +69,8 @@
                     </div>
 
                     <div class="messageListBranch__body">
-                      <div class="messageListBranch__name" v-text="item.partnerName" />
-                      <div class="messageListBranch__text" v-html="item.lastMessageContent" />
+                      <div class="messageListBranch__name" v-text="item.partnerName"/>
+                      <div class="messageListBranch__text" v-html="item.lastMessageContent"/>
                     </div>
 
                   </div>
@@ -87,21 +90,42 @@
         </div>
 
         <!-- Тут у нас активное окно с диалогом -->
-        <div class="px-2" style="width: calc(100% - 360px);">
-          <Nuxt/>
+        <div style="width: calc(100% - 360px);">
+          <Nuxt :chatId="chatId"/>
         </div>
 
       </div>
     </div>
 
+    <v-dialog v-model="error_dialog"
+              width="500">
+      <v-card>
+        <v-card-title class="text-h5 grey lighten-2">Ошибка!</v-card-title>
+        <v-card-text v-text="error_dialog_text"/>
 
-    <v-menu
-      v-model="showMenu"
-      :position-x="x"
-      :position-y="y"
-      absolute
-      offset-y
-    >
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            @click="error_dialog = false"
+            class="d-block text-none auth-button--outlined mt-5 px-7"
+            outlined
+            color="#8A138C"
+            height="45px">
+            ОК!
+          </v-btn>
+
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-menu v-model="show_menu"
+            :position-x="x_menu_pos"
+            :position-y="y_menu_pos"
+            absolute
+            offset-y>
       <v-list>
         <v-list-item
           v-for="(index) in 4"
@@ -118,76 +142,124 @@
 import {Vue, Component, Watch, Provide} from 'vue-property-decorator';
 import logger from "assets/scripts/logger";
 
-@Component({
-
-})
+@Component({})
 export default class Default extends Vue {
+  // Id текущего чата
+  @Provide() chatId: number | null | undefined
+
+  // Все наши диалоги
+  dialogBranches: any = []
+
+  // Тут мы сохраняем id выбранного диалога
+  selectedDialog: any = null;
+
+  // Переменные для анимаций загрузки
   checkUserLoading: boolean = true;
   getContentLoading: boolean = true;
 
-  // dialogBranches: any = [];
-  dialogBranches: any = []
+  // Для меню
+  x_menu_pos: number = 0;
+  y_menu_pos: number = 0;
+  show_menu: boolean = false;
 
-  @Provide() chatId: number = this.selectedDialog
-
-  selectedDialog: any = null;
-  showMenu: boolean = false;
-  x: number = 0;
-  y: number = 0;
-
-  show(e: any): void {
-    e.preventDefault()
-    this.showMenu = false
-    this.x = e.clientX
-    this.y = e.clientY
-    this.$nextTick(() => {
-      this.showMenu = true
-    })
-  }
+  // Для диалогового окна
+  error_dialog: boolean = false;
+  error_dialog_text = ''
 
   async mounted() {
-    // 1. Проверяем авторизован ли человек
-    if (!(localStorage.getItem('accessToken'))) {
-      localStorage.removeItem('accessToken');
-      await this.$router.push('/auth/login')
-    }
+    // Проверяем авторизацию
+    await this.checkUserAuth()
 
-    await this.$axios.get("/api/chat", {
+    // Получаем ветку диалогов
+    await this.getChatList()
+
+    // Выбираем текущий диалог, если в ссылке есть id диалога
+    await this.getDialogIdInsideLink()
+  }
+
+  async checkUserAuth() {
+    // Проверяем авторизован ли человек
+    // if (!(localStorage.getItem('accessToken'))) {
+    //   localStorage.removeItem('accessToken');
+    //   return await this.$router.push('/auth/login')
+    // }
+
+    // Заканчиваем анимацию загрузки "Циркуляра"
+    this.checkUserLoading = false;
+  }
+
+  async getChatList() {
+    // Проходим дальше, делаем запрос на
+    await this.$axios.get("/api/chat/", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`
       }
     })
+      // если запрос отработал штатно
       .then((response) => {
         this.dialogBranches = response.data
         logger(this.dialogBranches)
       })
-      .catch((error) =>{
+      // в случае, если у нас ошибка
+      .catch((error) => {
         logger(error)
       })
+      // в независимости от исхода запроса, убираем анимацию загрузки
+      .finally(() => {
+        // заканчиваем анимацию "Скелетона" на диалогах
+        this.getContentLoading = false;
 
-    this.checkUserLoading = false;
 
-    // 2. Смотрим текущую ссылку, если в ней выбран диалог, то смотрим какой
+        // Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
+        this.dialogBranches = [
+          {
+            partnerName: 'KekV',
+            lastMessageContent: 'last message...',
+          }
+        ]
+
+      })
+  }
+
+  // Предположительно, id диалога будет только число, делаю проверку на правильность
+  async getDialogIdInsideLink() {
+    // Получаем из ссылки id диалога (помним, он идет в виде строки)
     const currentRoute = this.$router.currentRoute.params.id
 
-    // тут мы получаем значение с нашей ссылки, после, ищем id (или то значение, по которому будет идентифицироваться
-    // выбранный диалог в ссылке)
+    // Если ничего нет, функция не отрабатывает
+    if (!currentRoute) return
 
-    // тут делаем запрос, смотрим, есть ли вообще этот диалог, и имеет ли доступ к нему пользователь?
+    // Если любое значение не число, то сообщаем пользователю о невалидности и перекидываем на индекс
+    if (!Number.isInteger(Number(currentRoute))) {
 
-    // если всё гуд, то заносим его в переменную selectedDialog, и отображаем его в списке как выбранный
-    // если же нет, переносим его на '/' или всячески сообщаем пользователю, что у него нет доступа
+      await this.$router.push('/')
 
+      this.error_dialog = true
+      this.error_dialog_text = 'Такого диалога не существует!'
 
-    setTimeout(() => {
-      this.getContentLoading = false;
-    }, 1000)
+      return
+    }
+
+    // передаём значение в качестве числа
+    return this.chatId = +currentRoute
+
+  }
+
+  // Показываем диалог по клику
+  show(e: any): void {
+    e.preventDefault()
+    this.show_menu = false
+    this.x_menu_pos = e.clientX
+    this.y_menu_pos = e.clientY
+    this.$nextTick(() => {
+      this.show_menu = true
+    })
   }
 
   // При изменении диалога, меняем страницу
-  @Watch('selectedDialog')
+  @Watch('chatId')
   changeCurrentRouteMessageBranch() {
-    this.$router.push('/' + (this.dialogBranches[this.selectedDialog] ?? ''))
+    return this.chatId ? this.$router.push('/' + (this.dialogBranches[this.chatId] ?? '')) : this.$router.push('/')
   }
 }
 </script>
@@ -212,4 +284,3 @@ export default class Default extends Vue {
   color: #8a8a8a !important;
 }
 </style>
-
