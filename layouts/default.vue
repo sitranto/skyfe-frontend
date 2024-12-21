@@ -179,10 +179,10 @@ export default class Default extends Vue {
 
   async checkUserAuth() {
     // Проверяем авторизован ли человек
-    // if (!(localStorage.getItem('accessToken'))) {
-    //   localStorage.removeItem('accessToken');
-    //   return await this.$router.push('/auth/login')
-    // }
+    if (!(localStorage.getItem('accessToken'))) {
+      localStorage.removeItem('accessToken');
+      return await this.$router.push('/auth/login')
+    }
 
     // Заканчиваем анимацию загрузки "Циркуляра"
     this.checkUserLoading = false;
