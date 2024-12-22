@@ -31,7 +31,7 @@
 
       <!-- Информация о пользователе  -->
       <div class="white shadow--info" style="height: 60px">
-        Инфо про юзера
+        {{this.parentDate.partnerName}}
       </div>
 
 
@@ -44,10 +44,10 @@
           <v-card v-for="(item, i) in messages" :key="i"
                   width="fit-content"
                   max-width="500px"
-                  :class="'message px-2 py-1 mb-4 ' + whoIsUser(item.userId).class"
-                  :color="whoIsUser(item.userId).color">
+                  :class="'message px-2 py-1 mb-4 ' + whoIsUser(item.from.id).class"
+                  :color="whoIsUser(item.from.id).color">
             <div class="message-container">
-              {{ item.text }}
+              {{ item.content }}
             </div>
           </v-card>
         </div>
@@ -67,6 +67,7 @@
                         v-model="message"
                         label="Сообщение"
                         type="text"
+                        @keyup.enter="sendMessageAndRefresh"
                         hide-details
                         outlined/>
           <v-btn class="ma-0 pa-0 ml-3"
@@ -90,7 +91,11 @@ import logger from "assets/scripts/logger";
 
 @Component({})
 export default class _id extends Vue {
-  @Inject() chatId!: number | null | undefined
+
+  @Inject('parentDate') parentDate: any;
+
+
+
   loadMessages: boolean = true
 
   messages: any = [];
@@ -98,15 +103,18 @@ export default class _id extends Vue {
 
   // mounted всегда наверх
   async mounted() {
+    logger(this.parentDate)
+
     await this.initMessages()
-    logger('chat id is: ', this.chatId)
+
   }
 
   async initMessages() {
-    await this.$axios.get("/api/message/", {
+    logger('chat id is: ', this.parentDate.chatId)
+    await this.$axios.get("/api/message", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        chatId: this.chatId
+        chatId: this.parentDate.chatId
       }
     })
       .then((response) => {
@@ -115,6 +123,7 @@ export default class _id extends Vue {
       })
       .catch((error) => {
         logger(error)
+        this.$router.push('/')
       })
       .finally(() => {
         this.loadMessages = false
@@ -123,21 +132,29 @@ export default class _id extends Vue {
 
   async sendMessage() {
     let status = false
+
+    if(this.message.length <= 0 ) {
+      return
+    }
+
     await this.$axios.post("/api/message/send", {
         content: this.message
       },
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          chatId: this.chatId
+          chatId: this.parentDate.chatId
         }
       })
       .then((response) => {
+        logger("Сообщение отправлено")
         status = true
+        this.message = ""
       })
       .catch((error) => {
         status = false
         logger(error)
+        this.$router.push('/')
       })
 
     return status
@@ -156,12 +173,12 @@ export default class _id extends Vue {
   // Тут подставляются стили для сообщений, в зависимости от того, кто сообщение отправил, текущий пользователь или собеседник
   whoIsUser(id: number) {
     // Получаем id пользователя
-    return this.chatId == id ? {
+    return id == this.parentDate.partnerId ? {
       color: 'white',
-      class: 'message-isOwner align-self-end black--text'
+      class: 'message-isCompanion align-self-start black--text'
     } : {
       color: 'var(--main-color-transparent)',
-      class: 'message-isCompanion align-self-start white--text'
+      class: 'message-isOwner align-self-end white--text'
     }
   }
 }
@@ -220,11 +237,11 @@ export default class _id extends Vue {
   border-radius: 10px !important;
 }
 
-.message.message-isCompanion {
+.message.message-isOwner {
   box-shadow: 1px 5px 28px 1px rgba(138, 19, 140, 0.5) !important;
 }
 
-.message.message-isOwner {
+.message.message-isCompanion {
   box-shadow: 1px 5px 28px 1px rgba(255, 255, 255, 1) !important;
 }
 

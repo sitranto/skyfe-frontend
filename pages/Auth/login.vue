@@ -30,6 +30,7 @@
                       :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showPass ? 'text' : 'password'"
                       @click:append="showPass = !showPass"
+                      @keyup.enter="auth"
                       v-model="model.password"
                       outlined/>
       </div>

@@ -84,18 +84,18 @@
 
         <!-- Тут мы выводим разметку, в случае если диалогов не будет -->
         <div v-else>
-        <button-menu/>
-        <div class="d-flex justify-center align-center"
-             style="width: 360px; height: 100vh; background-color: white">
-          <div>
-            Нет диалогов
+          <button-menu/>
+          <div class="d-flex justify-center align-center"
+               style="width: 360px; height: 100vh; background-color: white">
+            <div>
+              Нет диалогов
+            </div>
           </div>
-        </div>
         </div>
 
         <!-- Тут у нас активное окно с диалогом -->
         <div style="width: calc(100% - 360px);">
-          <Nuxt :chatId="chatId"/>
+          <Nuxt :parentData="parentDate"/>
         </div>
 
       </div>
@@ -154,8 +154,12 @@ import {reactive} from "vue";
   }
 })
 export default class Default extends Vue {
-  // Id текущего чата
-  @Provide() chatId = reactive({ value: Number });
+
+  @Provide() parentDate = reactive({
+    partnerId: null,
+    partnerName: '',
+    chatId: null
+  });
 
   // Все наши диалоги
   dialogBranches: any = []
@@ -207,10 +211,6 @@ export default class Default extends Vue {
     })
       // если запрос отработал штатно
       .then((response) => {
-        if (response.status == 403) {
-          localStorage.removeItem('accessToken')
-          this.$router.push('/auth/login')
-        }
         this.dialogBranches = response.data
         logger(this.dialogBranches)
       })
@@ -218,6 +218,8 @@ export default class Default extends Vue {
       .catch((error) => {
         logger(`Bearer ${localStorage.getItem('accessToken')}`)
         logger(error)
+        localStorage.removeItem('accessToken')
+        this.$router.push('/auth/login')
       })
       // в независимости от исхода запроса, убираем анимацию загрузки
       .finally(() => {
@@ -225,13 +227,13 @@ export default class Default extends Vue {
         this.getContentLoading = false;
 
 
-         /*// Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
-         this.dialogBranches = [
-           {
-             partnerName: 'KekV',
-             lastMessageContent: 'last message...',
-           }
-         ]*/
+        /*// Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
+        this.dialogBranches = [
+          {
+            partnerName: 'KekV',
+            lastMessageContent: 'last message...',
+          }
+        ]*/
 
       })
   }
@@ -240,7 +242,7 @@ export default class Default extends Vue {
   async getDialogIdInsideLink() {
     // Получаем из ссылки id диалога (помним, он идет в виде строки)
     const currentRoute = this.$router.currentRoute.params.id
-
+    logger(currentRoute)
     // Если ничего нет, функция не отрабатывает
     if (!currentRoute) return
 
@@ -257,7 +259,6 @@ export default class Default extends Vue {
 
     // передаём значение в качестве числа
     //return this.chatId = +currentRoute
-    return this.chatId = +currentRoute
 
   }
 
@@ -272,10 +273,17 @@ export default class Default extends Vue {
     })
   }
 
-  // При изменении диалога, меняем страницу
-  @Watch('chatId')
-  changeCurrentRouteMessageBranch() {
-    return this.chatId ? this.$router.push('/' + (this.dialogBranches[this.chatId] ?? '')) : this.$router.push('/')
+  //Для проверки работы selectDialog
+  @Watch('selectedDialog')
+  changeSelectedDialog() {
+    logger("Выбран: " + this.selectedDialog + " диалог")
+    if (this.selectedDialog != undefined) {
+      const selectedDialog = this.dialogBranches[this.selectedDialog]
+      this.parentDate.chatId = selectedDialog.chatId
+      this.parentDate.partnerId = selectedDialog.partnerId
+      this.parentDate.partnerName = selectedDialog.partnerName
+      return this.$router.push('/' + (selectedDialog.chatId ?? ''))
+    }
   }
 }
 </script>
