@@ -22,7 +22,7 @@
       width="360px"
     >
       <v-list>
-        <v-list-item>
+        <v-list-item class="mb-10">
           <v-row justify="space-between" align="center">
             <v-btn
               class="ma-1"
@@ -35,69 +35,119 @@
               </v-icon>
             </v-btn>
 
-            <v-btn
-              class="ma-1"
-              color="red"
-              elevation="2"
-              icon
-              large
-              @click="exitAccount"
-              outlined>
-              <v-icon>
-                mdi-exit-to-app
-              </v-icon>
-            </v-btn>
+            <div>
+              <v-btn
+                color="orange"
+                elevation="2"
+                icon
+                large
+                @click="patch = !patch"
+                outlined>
+                <v-icon>
+                  mdi-pencil
+                </v-icon>
+              </v-btn>
+
+              <v-btn
+                class="ma-1"
+                color="red"
+                elevation="2"
+                icon
+                large
+                @click="exitAccount"
+                outlined>
+                <v-icon>
+                  mdi-exit-to-app
+                </v-icon>
+              </v-btn>
+            </div>
           </v-row>
         </v-list-item>
         <v-list-item>
-          <div class="d-flex justify-center align-center flex-column" style="width: 100%">
-            <div class="mb-2">
-              <v-text-field class="custom-input-menu pa-0 ma-0"
-                            v-model="model.phone"
-                            label="Телефон"
-                            type="text"
-                            hide-details
-                            outlined/>
-            </div>
-            <div class="mb-2">
-              <v-text-field class="custom-input-menu pa-0 ma-0"
-                            v-model="model.firstName"
-                            label="Имя"
-                            type="text"
-                            hide-details
-                            outlined/>
-            </div>
-            <div class="mb-2">
-              <v-text-field class="custom-input-menu pa-0 ma-0"
-                            v-model="model.lastName"
-                            label="Фамилия"
-                            type="text"
-                            hide-details
-                            outlined/>
-            </div>
-            <div class="mb-2">
-              <v-text-field class="custom-input-menu pa-0 ma-0"
-                            v-model="model.username"
-                            label="Имя пользователя"
-                            type="text"
-                            hide-details
-                            outlined/>
-            </div>
-            <div class="mb-2">
-              <v-textarea
-                outlined
-                name="input-7-4"
-                label="О себе"
-                v-model="model.bio"
-              ></v-textarea>
-            </div>
-
-            <v-btn
-              depressed
-              color="primary"
-            >
-              Сохранить
-            </v-btn>
+          <div v-if="patch" class="d-flex flex-column align-center pa-4" style="width: 100%">
+            <v-card outlined class="pa-3 mb-4" style="width: 100%; max-width: 320px;">
+              <v-card-title>
+                <v-icon class="mr-2" color="blue">mdi-information-outline</v-icon>
+                <span class="text-h6">Личная информация</span>
+              </v-card-title>
+              <v-divider></v-divider>
+              <v-card-text>
+                <div class="mb-2">
+                  <strong>Телефон:</strong> {{ model.phone || 'Не указано' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Имя:</strong> {{ model.firstName || 'Не указано' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Фамилия:</strong> {{ model.lastName || 'Не указано' }}
+                </div>
+                <div class="mb-2">
+                  <strong>Имя пользователя:</strong> {{ model.username || 'Не указано' }}
+                </div>
+                <div class="mb-2">
+                  <strong>О себе:</strong> {{ model.bio || 'Не указано' }}
+                </div>
+              </v-card-text>
+            </v-card>
+          </div>
+          <div v-else
+            class="d-flex justify-center align-center flex-column" style="width: 100%">
+            <v-card outlined class="pa-3 mb-4" style="width: 100%; max-width: 320px;">
+              <v-card-title>
+                <v-icon class="mr-2" color="orange">mdi-pencil</v-icon>
+                <span class="text-h6">Редактировать данные</span>
+              </v-card-title>
+              <v-divider></v-divider>
+              <v-card-text>
+                <div class="mb-2">
+                  <v-text-field
+                    v-model="model.phone"
+                    label="Телефон"
+                    type="text"
+                    outlined
+                  />
+                </div>
+                <div class="mb-2">
+                  <v-text-field
+                    v-model="model.firstName"
+                    label="Имя"
+                    type="text"
+                    outlined
+                  />
+                </div>
+                <div class="mb-2">
+                  <v-text-field
+                    v-model="model.lastName"
+                    label="Фамилия"
+                    type="text"
+                    outlined
+                  />
+                </div>
+                <div class="mb-2">
+                  <v-text-field
+                    v-model="model.username"
+                    label="Имя пользователя"
+                    type="text"
+                    outlined
+                  />
+                </div>
+                <div class="mb-2">
+                  <v-textarea
+                    v-model="model.bio"
+                    label="О себе"
+                    outlined
+                  ></v-textarea>
+                </div>
+              </v-card-text>
+              <v-card-actions class="justify-end">
+                <v-btn
+                  color="green"
+                  @click="saveChanges"
+                >
+                  Сохранить
+                </v-btn>
+              </v-card-actions>
+            </v-card>
           </div>
         </v-list-item>
       </v-list>
@@ -121,12 +171,15 @@ export default class buttonMenu extends Vue {
   //Отслеживание состояния меню
   drawer = false;
 
+  //Отслеживание изменения информации профиля
+  patch = true;
+
   async exitAccount() {
     await localStorage.removeItem('accessToken');
     return await this.$router.push('/auth/login');
   }
 
-  async saveInfo () {
+  async saveChanges() {
 
   }
 }
