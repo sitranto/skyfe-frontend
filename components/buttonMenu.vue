@@ -119,76 +119,82 @@
               <v-tabs-items v-model="tab">
                 <!-- Первый таб: Авторизация телефона -->
                 <v-tab-item value="mobile-tabs-5-1">
-                  <v-card-text>
-                    <div class="mb-2">
-                      <v-text-field
-                        v-model="model.number"
-                        label="Телефон"
-                        v-mask="`+7##########`"
-                        :rules="[rules.length(12)]"
-                        type="text"
-                        outlined
-                      />
-                      <v-card-actions class="justify-end">
-                        <v-btn
-                          color="green"
-                          @click="saveChangesNumber"
-                        >
-                          Сохранить
-                        </v-btn>
-                      </v-card-actions>
-                    </div>
-                  </v-card-text>
+                  <v-form v-model="validForm.one" ref="validFormOne">
+                    <v-card-text>
+                      <div class="mb-2">
+                        <v-text-field
+                          v-model="model.number"
+                          label="Телефон"
+                          v-mask="`+7##########`"
+                          :rules="[rules.length(12)]"
+                          type="text"
+                          outlined
+                        />
+                        <v-card-actions class="justify-end">
+                          <v-btn dark
+                            color="green"
+                            @click="checkNumber"
+                          >
+                            Сохранить
+                          </v-btn>
+                        </v-card-actions>
+                      </div>
+                    </v-card-text>
+                  </v-form>
                 </v-tab-item>
 
                 <!-- Второй таб: Остальные данные -->
                 <v-tab-item value="mobile-tabs-5-2">
-                  <v-card-text>
-                    <div class="mb-2">
-                      <v-text-field
-                        v-model="model.firstName"
-                        label="Имя"
-                        :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
-                        type="text"
-                        outlined
-                      />
-                    </div>
-                    <div class="mb-2">
-                      <v-text-field
-                        v-model="model.lastName"
-                        label="Фамилия"
-                        :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
-                        type="text"
-                        outlined
-                      />
-                    </div>
-                    <div class="mb-2">
-                      <v-text-field
-                        v-model="model.username"
-                        label="Имя пользователя"
-                        :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
-                        type="text"
-                        outlined
-                      />
-                    </div>
-                    <div class="mb-2">
-                      <v-textarea
-                        v-model="model.bio"
-                        label="О себе"
-                        :rules="[rules.inputLength.maxLength(100)]"
-                        outlined
-                      ></v-textarea>
-                    </div>
-                    <!-- Кнопка для сохранения изменений -->
-                    <v-card-actions class="justify-end">
-                      <v-btn
-                        color="green"
-                        @click="saveChangesOther"
-                      >
-                        Сохранить
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card-text>
+                  <v-form v-model="validForm.two" ref="validFormTwo">
+                    <v-card-text>
+                      <div class="mb-2">
+                        <v-text-field
+                          v-model="model.firstName"
+                          label="Имя"
+                          :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
+                          type="text"
+                          outlined
+                        />
+                      </div>
+                      <div class="mb-2">
+                        <v-text-field
+                          v-model="model.lastName"
+                          label="Фамилия"
+                          :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
+                          type="text"
+                          outlined
+                        />
+                      </div>
+                      <div class="mb-2">
+                        <v-text-field
+                          v-model="model.username"
+                          label="Имя пользователя"
+                          :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
+                          type="text"
+                          outlined
+                        />
+                      </div>
+                      <div class="mb-2">
+                        <v-textarea
+                          rows="5"
+                          counter
+                          v-model="model.bio"
+                          label="О себе"
+                          :rules="[rules.inputLength.maxLength(100)]"
+                          outlined
+                        ></v-textarea>
+                      </div>
+                      <!-- Кнопка для сохранения изменений -->
+                      <v-card-actions class="justify-end">
+                        <v-btn dark
+                          color="green"
+                          @click="saveChangesOther"
+                        >
+                          Сохранить
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card-text>
+                  </v-form>
                 </v-tab-item>
               </v-tabs-items>
             </v-card>
@@ -196,21 +202,59 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
+
+    <v-dialog v-model="dialog" max-width="500px">
+      <v-card class="pa-3">
+        <v-card-title>
+          Введите пароль
+        </v-card-title>
+        <div>
+          <v-text-field
+            label="Пароль"
+            v-model="model.password"
+            :rules="[rules.inputLength.minLength(8), rules.inputLength.maxLength(32)]"
+            :append-icon="showPass.one ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="showPass.one ? 'text' : 'password'"
+            @click:append="showPass.one = !showPass.one"
+          />
+        </div>
+        <v-card-actions class="justify-end">
+          <v-btn dark
+            @click="closeDialog"
+          color="red">
+            Отмена
+          </v-btn>
+          <v-btn dark
+            @click="saveChangesNumber"
+          color="green">
+            Изменить
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </div>
 </template>
 <script lang="ts">
 import {Vue, Component, Watch} from 'vue-property-decorator';
+import logger from "~/assets/scripts/logger";
 
 @Component({})
 export default class buttonMenu extends Vue {
 
+  showPass = {
+    one: false,
+  }
+
   model: any = {
     number: "",
+    password: "",
     firstName: "",
     lastName: "",
     username: "",
     bio: ""
   }
+
 
   localModel: any = {
     number: "",
@@ -220,6 +264,8 @@ export default class buttonMenu extends Vue {
     bio: ""
   }
 
+  dialog: boolean = false;
+
   //Отслеживание состояния меню
   drawer = false;
 
@@ -227,6 +273,11 @@ export default class buttonMenu extends Vue {
   patch = true;
 
   tab: number = 0;
+
+  validForm: any = {
+    one: false,
+    two: false,
+  };
 
   rules = {
     length: (len: any) => (v: any) =>
@@ -238,6 +289,11 @@ export default class buttonMenu extends Vue {
       maxLength: (len: any) => (v: any) =>
         (v || '').length <= (len ?? 8) || `Не может быть больше ${len} символов`
     },
+  }
+
+  closeDialog(): void {
+    this.dialog = false;
+    this.model.password = "";
   }
 
   changeDrawer() {
@@ -273,15 +329,73 @@ export default class buttonMenu extends Vue {
   }
 
   async saveChangesOther() {
+    if ((this.model.firstName == this.localModel.firstName) && (this.model.lastName == this.localModel.lastName) &&
+      (this.model.username == this.localModel.username) && (this.model.bio == this.localModel.bio)) {
+      logger("not changed");
+      return;
+    }
 
+    this.validateForm("validFormTwo") && await this.$axios.patch("/api/user/change/data", {
+        firstName: this.model.firstName,
+        lastName: this.model.lastName,
+        username: this.model.username,
+        bio: this.model.bio,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      })
+      .then((response) => {
+        logger(response);
+        localStorage.setItem('firstName', this.model.firstName );
+        localStorage.setItem('lastName', this.model.lastName );
+        localStorage.setItem('username', this.model.username );
+        localStorage.setItem('bio', this.model.bio);
+
+        this.patch = !this.patch;
+        this.initValues();
+      })
+      .catch((error) => {
+        logger(error);
+      })
+  }
+
+  checkNumber() {
+    if(this.model.number == this.localModel.number) {
+      return;
+    }
+    this.validateForm("validFormOne") && (this.dialog = !this.dialog)
   }
 
   async saveChangesNumber() {
+
+    await this.$axios.patch("/api/user/change/number", {
+      number: this.model.number,
+      password: this.model.password
+    },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      })
+      .then((response) => {
+        logger(response.data.accessToken);
+        localStorage.setItem('accessToken', response.data.accessToken);
+        localStorage.setItem('number', this.model.number);
+
+        this.dialog = !this.dialog;
+      })
 
   }
 
   mounted(): void {
     this.initValues()
+  }
+
+  validateForm(val: string): boolean {
+    // @ts-ignore
+    return this.$refs[val].validate()
   }
 }
 </script>

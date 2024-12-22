@@ -23,7 +23,7 @@ export default class inputFind extends Vue {
   name: string = "";
 
   async search() {
-    logger("hui")
+    this.$axios
   }
 
 }
