@@ -225,13 +225,13 @@ export default class Default extends Vue {
         this.getContentLoading = false;
 
 
-         // Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
+         /*// Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
          this.dialogBranches = [
            {
              partnerName: 'KekV',
              lastMessageContent: 'last message...',
            }
-         ]
+         ]*/
 
       })
   }
