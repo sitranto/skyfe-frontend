@@ -177,7 +177,7 @@
         outlined
         prominent
         type="error">
-        {{modalValue}}
+        {{ modalValue }}
       </v-alert>
     </div>
 
@@ -316,12 +316,18 @@ export default class reg extends Vue {
 
     this.validateForm(`validFormThree`) && await this.$axios.post("/api/user", this.model, {})
       .then((response) => {
-        const jwt: any = response.data.accessToken;
-        if (jwt) {
-          localStorage.setItem("accessToken", jwt);
-          console.log("jwt token сохранён");
-          this.$router.push("/");
+        const data = response.data
+        localStorage.setItem("accessToken", data.accessToken);
+        logger("jwt token сохранён");
+        logger(data.bio)
+        localStorage.setItem("number", data.number);
+        localStorage.setItem("firstName", data.firstName);
+        localStorage.setItem("lastName", data.lastName);
+        localStorage.setItem("username", data.username);
+        if (data.bio != null) {
+          localStorage.setItem('bio', data.bio);
         }
+        this.$router.push("/");
       })
       .catch((error) => {
         this.modalValue = "Ошибка запроса"

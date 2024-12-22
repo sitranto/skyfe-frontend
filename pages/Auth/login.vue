@@ -118,15 +118,22 @@ export default class login extends Vue {
     logger(this.model);
     this.validateForm && await this.$axios.post("/api/auth", this.model, {})
       .then((response) => {
-        logger(response.data.accessToken);
-        const jwt: any = response.data.accessToken;
-        if (jwt) {
-          localStorage.setItem("accessToken", jwt);
-          logger("jwt токен сохранён")
-          this.$router.push("/");
+        const data = response.data
+        localStorage.setItem("accessToken", data.accessToken);
+        logger("jwt token сохранён");
+        logger(data.bio)
+        localStorage.setItem("number", data.number);
+        logger("name: " + data.firsName,"secondName: " + data.lastName);
+        localStorage.setItem("firstName", data.firstName);
+        localStorage.setItem("lastName", data.lastName);
+        localStorage.setItem("username", data.username);
+        if (data.bio != null) {
+          localStorage.setItem('bio', data.bio);
         }
+        this.$router.push("/");
       })
-      .catch(() => {
+      .catch((error) => {
+        logger("error");
         this.modal = true
       })
       .finally(() => {

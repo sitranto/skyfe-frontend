@@ -51,8 +51,10 @@
         <v-list v-if="dialogBranches.length" dense
                 style="width: 360px; height: 100vh; background-color: white">
           <div class="white mb-2" style=" ">
-            <div style="height: 53px ; border-bottom: 1px solid gray;">
-          <button-menu/>
+            <div class="d-flex align-center justify-space-between flex-row ml-2"
+              style="height: 53px ; border-bottom: 1px solid gray;">
+              <button-menu/>
+              <input-find class="mr-7"/>
             </div>
           </div>
           <v-list-item-group v-model="selectedDialog"
@@ -91,6 +93,7 @@
           <div class="white" style=" ">
             <div style="height: 53px ; border-bottom: 1px solid gray;">
               <button-menu/>
+              <input-find/>
             </div>
           </div>
           <div class="d-flex justify-center align-center"
@@ -154,11 +157,13 @@
 import {Vue, Component, Watch, Provide} from 'vue-property-decorator';
 import logger from "assets/scripts/logger";
 import buttonMenu from "~/components/buttonMenu.vue";
+import inputFind from "~/components/inputFind.vue"
 import {reactive} from "vue";
 
 @Component({
   components: {
     buttonMenu,
+    inputFind,
   }
 })
 export default class Default extends Vue {
@@ -227,6 +232,11 @@ export default class Default extends Vue {
         logger(`Bearer ${localStorage.getItem('accessToken')}`)
         logger(error)
         localStorage.removeItem('accessToken')
+        localStorage.removeItem('number')
+        localStorage.removeItem('firstName')
+        localStorage.removeItem('lastName')
+        localStorage.removeItem('username')
+        localStorage.removeItem('bio')
         this.$router.push('/auth/login')
       })
       // в независимости от исхода запроса, убираем анимацию загрузки
