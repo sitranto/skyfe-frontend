@@ -50,7 +50,11 @@
         <!-- color="transparent"-->
         <v-list v-if="dialogBranches.length" dense
                 style="width: 360px; height: 100vh; background-color: white">
-          <button-menu class="mb-2"/>
+          <div class="white mb-2" style=" ">
+            <div style="height: 53px ; border-bottom: 1px solid gray;">
+          <button-menu/>
+            </div>
+          </div>
           <v-list-item-group v-model="selectedDialog"
                              color="primary">
             <!-- virtual scroll в v-for не нуждается, -->
@@ -84,7 +88,11 @@
 
         <!-- Тут мы выводим разметку, в случае если диалогов не будет -->
         <div v-else>
-          <button-menu/>
+          <div class="white" style=" ">
+            <div style="height: 53px ; border-bottom: 1px solid gray;">
+              <button-menu/>
+            </div>
+          </div>
           <div class="d-flex justify-center align-center"
                style="width: 360px; height: 100vh; background-color: white">
             <div>

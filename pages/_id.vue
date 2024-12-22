@@ -30,7 +30,10 @@
 
 
       <!-- Информация о пользователе  -->
-      <div class="white shadow--info" style="height: 60px">
+      <div class="white shadow--info d-flex align-center" style="height: 60px">
+        <div class="messageListBranch__img mx-3">
+          <img src="https://placehold.co/48x48" alt="img">
+        </div>
         {{this.parentDate.partnerName}}
       </div>
 
@@ -225,6 +228,13 @@ export default class _id extends Vue {
   top: 0; /* прикрепить к верху */
   z-index: 1000;
   margin: 0 !important;
+}
+
+.messageListBranch__img img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
 }
 
 .shadow--info {
