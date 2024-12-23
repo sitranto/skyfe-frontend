@@ -2,7 +2,7 @@ import colors from 'vuetify/es5/util/colors'
 
 const is_prod = true
 
-const port = 4000
+const port = 8080
 const link = is_prod ? 'http://31.129.98.120' : 'http://localhost'
 const serverLink = link + ':' + port + '/api/'
 
