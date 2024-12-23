@@ -96,9 +96,8 @@
 </template>
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
-import logger from "assets/scripts/logger";
-import optionChat from "~/components/optionChat.vue";
-import OptionChat from "~/components/optionChat.vue";
+import logger from "../assets/scripts/logger";
+import OptionChat from "../components/optionChat.vue";
 
 @Component({
   components: {OptionChat}

@@ -237,7 +237,7 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Watch} from 'vue-property-decorator';
-import logger from "~/assets/scripts/logger";
+import logger from "../assets/scripts/logger";
 
 @Component({})
 export default class buttonMenu extends Vue {

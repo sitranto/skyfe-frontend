@@ -15,7 +15,7 @@
 </template>
 <script lang="ts">
 import {Vue, Component} from 'vue-property-decorator';
-import logger from "~/assets/scripts/logger";
+import logger from "../assets/scripts/logger";
 
 @Component({})
 export default class inputFind extends Vue {

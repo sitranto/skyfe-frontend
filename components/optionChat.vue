@@ -30,7 +30,7 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Prop} from 'vue-property-decorator';
-import logger from "~/assets/scripts/logger";
+import logger from "../assets/scripts/logger";
 
 @Component({})
 export default class optionChat extends Vue {

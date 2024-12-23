@@ -157,9 +157,9 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Watch, Provide} from 'vue-property-decorator';
-import logger from "assets/scripts/logger";
-import buttonMenu from "~/components/buttonMenu.vue";
-import inputFind from "~/components/inputFind.vue"
+import logger from "../assets/scripts/logger";
+import buttonMenu from "../components/buttonMenu.vue";
+import inputFind from "../components/inputFind.vue"
 import {reactive} from "vue";
 
 @Component({
