@@ -12,7 +12,7 @@
         <template #default>
           <div class="skeleton-messages">
             <v-skeleton-loader
-              v-for="index in messages.lenght"
+              v-for="index in messages.length"
               :key="index"
               :loading="true"
               :width="getSkeletonWidth(index)"
@@ -30,11 +30,17 @@
 
 
       <!-- Информация о пользователе  -->
-      <div class="white shadow--info d-flex align-center" style="height: 60px">
-        <div class="messageListBranch__img mx-3">
-          <img src="https://placehold.co/48x48" alt="img">
+      <div class="white shadow--info d-flex justify-space-between" style="height: 60px">
+        <div class="d-flex align-center mt-1">
+          <div class="messageListBranch__img mx-3">
+            <img src="https://placehold.co/48x48" alt="img">
+          </div>
+          {{ this.parentDate.partnerName }}
         </div>
-        {{this.parentDate.partnerName}}
+        <!-- Кнопка опций чата -->
+        <div class="d-flex align-center mr-2">
+          <option-chat :chat="parentDate.chatId"/>
+        </div>
       </div>
 
 
@@ -91,12 +97,15 @@
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
 import logger from "assets/scripts/logger";
+import optionChat from "~/components/optionChat.vue";
+import OptionChat from "~/components/optionChat.vue";
 
-@Component({})
+@Component({
+  components: {OptionChat}
+})
 export default class _id extends Vue {
 
   @Inject('parentDate') parentDate: any;
-
 
 
   loadMessages: boolean = true
@@ -136,7 +145,7 @@ export default class _id extends Vue {
   async sendMessage() {
     let status = false
 
-    if(this.message.length <= 0 ) {
+    if (this.message.length <= 0) {
       return
     }
 
@@ -238,9 +247,9 @@ export default class _id extends Vue {
 }
 
 .shadow--info {
-  box-shadow: -2px 10px 19px -12px rgba(0,0,0,1);
-  -webkit-box-shadow: -2px 10px 19px -12px rgba(0,0,0,1);
-  -moz-box-shadow: -2px 10px 19px -12px rgba(0,0,0,1);
+  box-shadow: -2px 10px 19px -12px rgba(0, 0, 0, 1);
+  -webkit-box-shadow: -2px 10px 19px -12px rgba(0, 0, 0, 1);
+  -moz-box-shadow: -2px 10px 19px -12px rgba(0, 0, 0, 1);
 }
 
 .message {

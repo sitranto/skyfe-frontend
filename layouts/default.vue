@@ -291,6 +291,12 @@ export default class Default extends Vue {
     })
   }
 
+  @Watch('$route.params.id', { immediate: true })
+  onRouteChange(newId: string, oldId: string) {
+    // Когда параметр id в маршруте изменяется, мы обновляем chat
+    this.getChatList()
+  }
+
   //Для проверки работы selectDialog
   @Watch('selectedDialog')
   changeSelectedDialog() {
