@@ -51,10 +51,11 @@
         <v-list v-if="dialogBranches.length" dense
                 style="width: 360px; height: 100vh; background-color: white">
           <div class="white mb-2" style=" ">
+            <!-- Меню для управления -->
             <div class="d-flex align-center justify-space-between flex-row ml-2"
               style="height: 53px ; border-bottom: 1px solid gray;">
               <button-menu/>
-              <input-find class="mr-7"/>
+              <input-find class="mr-7" @createChat="handlerCreateChat"/>
             </div>
           </div>
           <v-list-item-group v-model="selectedDialog"
@@ -91,9 +92,10 @@
         <!-- Тут мы выводим разметку, в случае если диалогов не будет -->
         <div v-else>
           <div class="white" style=" ">
-            <div style="height: 53px ; border-bottom: 1px solid gray;">
+            <div class="d-flex align-center justify-space-between flex-row ml-2"
+                 style="height: 53px ; border-bottom: 1px solid gray;">
               <button-menu/>
-              <input-find/>
+              <input-find class="mr-7" @createChat="handlerCreateChat"/>
             </div>
           </div>
           <div class="d-flex justify-center align-center"
@@ -244,7 +246,6 @@ export default class Default extends Vue {
         // заканчиваем анимацию "Скелетона" на диалогах
         this.getContentLoading = false;
 
-
         /*// Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
         this.dialogBranches = [
           {
@@ -291,8 +292,15 @@ export default class Default extends Vue {
     })
   }
 
+  //Обработка события создания чата
+  async handlerCreateChat(id: number) {
+    await this.getChatList()
+    this.selectedDialog = this.dialogBranches.findIndex((dialog: any) => dialog.chatId === id)
+  }
+
+  //Проверка изменения ссылки для обновления чата
   @Watch('$route.params.id', { immediate: true })
-  onRouteChange(newId: string, oldId: string) {
+  onRouteChange() {
     // Когда параметр id в маршруте изменяется, мы обновляем chat
     this.getChatList()
   }

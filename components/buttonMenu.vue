@@ -384,7 +384,11 @@ export default class buttonMenu extends Vue {
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('number', this.model.number);
 
+        this.model.password = ""
         this.dialog = !this.dialog;
+      })
+      .catch((error) => {
+        logger(error);
       })
 
   }

@@ -5,7 +5,7 @@
       @click:append="search"
       @keyup.enter="search"
       dense
-      v-model="name"
+      v-model="username"
       label="Поиск"
       type="text"
       outlined
@@ -20,10 +20,25 @@ import logger from "~/assets/scripts/logger";
 @Component({})
 export default class inputFind extends Vue {
 
-  name: string = "";
+  username: string = "";
 
   async search() {
-    this.$axios
+    this.$axios.post("/api/chat/create", {
+      username: this.username
+    },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      })
+    .then(response => {
+      logger(`Чат ${response.data.id} создан`)
+      this.$emit("createChat", response.data.id);
+      this.username = "";
+    })
+      .catch(error => {
+        logger(error);
+      })
   }
 
 }
