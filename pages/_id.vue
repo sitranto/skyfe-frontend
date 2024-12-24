@@ -28,7 +28,6 @@
 
     <div class="d-flex flex-column" v-else style="height: 100vh">
 
-
       <!-- Информация о пользователе  -->
       <div class="white shadow--info d-flex justify-space-between" style="height: 60px">
         <div class="d-flex align-center mt-1">
@@ -71,22 +70,23 @@
       <!-- Инпут группа -->
       <div class="mx-10 pb-2">
         <v-card-actions class="d-flex justify-center align-center ma-0 pa-0">
-          <v-text-field class="custom-input pa-0 ma-0"
-                        placeholder="Введите сообщение"
-                        v-model="message"
-                        label="Сообщение"
-                        type="text"
-                        @keyup.enter="sendMessageAndRefresh"
-                        hide-details
-                        outlined/>
+          <v-textarea class="custom-input pa-0 ma-0"
+                      placeholder="Введите сообщение"
+                      v-model="message"
+                      label="Сообщение"
+                      type="textarea"
+                      auto-grow
+                      rows="1"
+                      @keyup.enter="sendMessageAndRefresh"
+                      hide-details
+                      outlined/>
+
           <v-btn class="ma-0 pa-0 ml-3"
                  color="#8A138C"
                  dark
                  fab
                  @click="sendMessageAndRefresh">
-            <v-icon dark>
-              mdi-send
-            </v-icon>
+            <v-icon dark>mdi-send</v-icon>
           </v-btn>
         </v-card-actions>
       </div>
@@ -96,24 +96,31 @@
 </template>
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
-import logger from "../assets/scripts/logger";
 import OptionChat from "../components/optionChat.vue";
+// @ts-ignore
+import logger from "~/assets/scripts/logger";
 
 @Component({
-  components: {OptionChat}
+  components: {
+    OptionChat,
+  }
 })
 export default class _id extends Vue {
 
   @Inject('parentDate') parentDate: any;
 
-
+  // Переменная загрузки сообщений
   loadMessages: boolean = true
 
+  // Переменная для всех сообщений
   messages: any = [];
+
+  // Введённое сообщение
   message: string = ""
 
   // mounted всегда наверх
   async mounted() {
+
     logger(this.parentDate)
 
     await this.initMessages()
@@ -121,6 +128,7 @@ export default class _id extends Vue {
   }
 
   async initMessages() {
+
     logger('chat id is: ', this.parentDate.chatId)
     await this.$axios.get("/api/message", {
       headers: {
@@ -129,8 +137,8 @@ export default class _id extends Vue {
       }
     })
       .then((response) => {
-        this.messages = response.data
         logger(response)
+        this.messages = response.data
       })
       .catch((error) => {
         logger(error)
@@ -145,6 +153,7 @@ export default class _id extends Vue {
     let status = false
 
     if (this.message.length <= 0) {
+      logger("Message is empty")
       return
     }
 

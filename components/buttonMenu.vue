@@ -2,26 +2,25 @@
   <div>
     <!-- кнопка для выдвижения меню -->
     <div>
-      <v-btn class="ma-2 ml-2"
+      <v-btn class="ma-1"
              color="white"
              fab
              small
              @click.stop="changeDrawer"
              elevation="0">
-        <v-icon dark>
-          mdi-menu
-        </v-icon>
+        <v-icon dark>mdi-menu</v-icon>
       </v-btn>
     </div>
 
-    <!-- Navigation Drawer -->
+    <!-- Разметка меню -->
     <v-navigation-drawer
       v-model="drawer"
       app
       temporary
-      width="360px"
-    >
+      width="360px">
+      <!-- Содержимое меню -->
       <v-list>
+        <!-- Кнопки сверху меню -->
         <v-list-item class="mb-10">
           <v-row justify="space-between" align="center">
             <v-btn
@@ -30,9 +29,7 @@
               icon
               large
               @click="changeDrawer">
-              <v-icon>
-                mdi-keyboard-backspace
-              </v-icon>
+              <v-icon>mdi-keyboard-backspace</v-icon>
             </v-btn>
 
             <div>
@@ -43,9 +40,7 @@
                 large
                 @click="changePatch"
                 outlined>
-                <v-icon>
-                  mdi-pencil
-                </v-icon>
+                <v-icon>mdi-pencil</v-icon>
               </v-btn>
 
               <v-btn
@@ -56,14 +51,15 @@
                 large
                 @click="exitAccount"
                 outlined>
-                <v-icon>
-                  mdi-exit-to-app
-                </v-icon>
+                <v-icon>mdi-exit-to-app</v-icon>
               </v-btn>
             </div>
           </v-row>
         </v-list-item>
+
+        <!-- Информация о пользователе -->
         <v-list-item>
+          <!-- Текущая информация о пользователе -->
           <div v-if="patch" class="d-flex flex-column align-center pa-4" style="width: 100%">
             <v-card outlined class="pa-3 mb-4" style="width: 100%; max-width: 320px;">
               <v-card-title>
@@ -90,6 +86,8 @@
               </v-card-text>
             </v-card>
           </div>
+
+          <!-- Поле изменения информации -->
           <div v-else
                class="d-flex justify-center align-center flex-column" style="width: 100%">
             <v-card outlined class="pa-3 mb-4" style="width: 100%; max-width: 320px;">
@@ -98,6 +96,7 @@
                 <span class="text-h6">Редактировать данные</span>
               </v-card-title>
               <v-tabs v-model="tab" fixed-tabs>
+
                 <!-- Вкладка Телефон -->
                 <v-tab
                   href="#mobile-tabs-5-1"
@@ -114,14 +113,18 @@
                   <v-icon>mdi-account-box-edit-outline</v-icon>
                 </v-tab>
               </v-tabs>
+
               <v-divider></v-divider>
 
               <v-tabs-items v-model="tab">
+
                 <!-- Первый таб: Авторизация телефона -->
                 <v-tab-item value="mobile-tabs-5-1">
                   <v-form v-model="validForm.one" ref="validFormOne">
+
                     <v-card-text>
                       <div class="mb-2">
+                        <!-- Ввод телефона -->
                         <v-text-field
                           v-model="model.number"
                           label="Телефон"
@@ -130,79 +133,95 @@
                           type="text"
                           outlined
                         />
-                        <v-card-actions class="justify-end">
-                          <v-btn dark
-                            color="green"
-                            @click="checkNumber"
-                          >
-                            Сохранить
-                          </v-btn>
-                        </v-card-actions>
                       </div>
                     </v-card-text>
+
+                    <!-- Кнопка сохранения -->
+                    <v-card-actions class="justify-end">
+                      <v-btn dark
+                             color="green"
+                             @click="checkNumber"
+                      >
+                        Сохранить
+                      </v-btn>
+                    </v-card-actions>
+
                   </v-form>
                 </v-tab-item>
 
                 <!-- Второй таб: Остальные данные -->
                 <v-tab-item value="mobile-tabs-5-2">
                   <v-form v-model="validForm.two" ref="validFormTwo">
+
                     <v-card-text>
+                      <!-- Ввод имени -->
                       <div class="mb-2">
                         <v-text-field
                           v-model="model.firstName"
                           label="Имя"
-                          :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
+                          :rules="[rules.required,
+                          rules.lengthName(3,32,true)
+                          ]"
                           type="text"
                           outlined
                         />
                       </div>
+                      <!-- Ввод фамилии -->
                       <div class="mb-2">
                         <v-text-field
                           v-model="model.lastName"
                           label="Фамилия"
-                          :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
+                          :rules="[rules.lengthName(3,32,true)]"
                           type="text"
                           outlined
                         />
                       </div>
+                      <!-- Ввод username -->
                       <div class="mb-2">
                         <v-text-field
                           v-model="model.username"
                           label="Имя пользователя"
-                          :rules="[rules.inputLength.minLength(1), rules.inputLength.maxLength(20)]"
+                          :rules="[rules.required,
+                          rules.lengthName(3,32,false)
+                          ]"
                           type="text"
                           outlined
                         />
                       </div>
+                      <!-- Ввод информации О себе -->
                       <div class="mb-2">
                         <v-textarea
                           rows="5"
-                          counter
+                          counter="100"
                           v-model="model.bio"
                           label="О себе"
-                          :rules="[rules.inputLength.maxLength(100)]"
-                          outlined
-                        ></v-textarea>
+                          :rules="[rules.lengthName(0,100,true)]"
+                          outlined/>
                       </div>
-                      <!-- Кнопка для сохранения изменений -->
-                      <v-card-actions class="justify-end">
-                        <v-btn dark
-                          color="green"
-                          @click="saveChangesOther"
-                        >
-                          Сохранить
-                        </v-btn>
-                      </v-card-actions>
                     </v-card-text>
+
+                    <!-- Кнопка для сохранения изменений -->
+                    <v-card-actions class="justify-end">
+                      <v-btn dark
+                             color="green"
+                             @click="saveChangesOther"
+                      >
+                        Сохранить
+                      </v-btn>
+                    </v-card-actions>
+
                   </v-form>
                 </v-tab-item>
               </v-tabs-items>
+
             </v-card>
           </div>
         </v-list-item>
+
       </v-list>
     </v-navigation-drawer>
 
+    <!-- Разметка диалогового окна -->
     <v-dialog v-model="dialog" max-width="500px">
       <v-card class="pa-3">
         <v-card-title>
@@ -211,22 +230,26 @@
         <div>
           <v-text-field
             label="Пароль"
+            type="text"
             v-model="model.password"
-            :rules="[rules.inputLength.minLength(8), rules.inputLength.maxLength(32)]"
+            :rules="[
+              rules.required,
+              rules.password.lengthInRange,
+            ]"
             :append-icon="showPass.one ? 'mdi-eye' : 'mdi-eye-off'"
             :type="showPass.one ? 'text' : 'password'"
-            @click:append="showPass.one = !showPass.one"
-          />
+            @click:append="showPass.one = !showPass.one"/>
         </div>
+        <!-- Блок кнопок -->
         <v-card-actions class="justify-end">
           <v-btn dark
-            @click="closeDialog"
-          color="red">
+                 @click="closeDialog"
+                 color="red">
             Отмена
           </v-btn>
           <v-btn dark
-            @click="saveChangesNumber"
-          color="green">
+                 @click="saveChangesNumber"
+                 color="green">
             Изменить
           </v-btn>
         </v-card-actions>
@@ -237,7 +260,8 @@
 </template>
 <script lang="ts">
 import {Vue, Component, Watch} from 'vue-property-decorator';
-import logger from "../assets/scripts/logger";
+// @ts-ignore
+import logger from "~/assets/scripts/logger";
 
 @Component({})
 export default class buttonMenu extends Vue {
@@ -279,16 +303,39 @@ export default class buttonMenu extends Vue {
     two: false,
   };
 
+  // Правила для валидации
   rules = {
     length: (len: any) => (v: any) =>
       (v || '').length >= (len ?? 8) ||
       `Недопустимая длина символов`,
-    inputLength: {
-      minLength: (len: any) => (v: any) =>
-        (v || '').length >= (len ?? 8) || `Не может быть меньше ${len} символов`,
-      maxLength: (len: any) => (v: any) =>
-        (v || '').length <= (len ?? 8) || `Не может быть больше ${len} символов`
+
+    lengthName: (min: number, max: number, type: boolean) => (v: any) => {
+      const len = (v || '').length; // Если поле пустое, длина равна 0
+      if ( type && len === 0) {
+        return true; // Если поле необязательно и пустое — всё валидно
+      }
+      return len >= min && len <= max
+        ? true
+        : `Разрешенная длина от ${min} до ${max} символов`;
     },
+
+    password: {
+      /* rule: (v: any) =>
+       !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
+       'Пароль должен содержать заглавную букву, цифру и специальный символ.',*/
+      lengthInRange: (v: any) => {
+        const len = (v || '').length; // Если пароль пустой, считаем длину как 0
+        return len >= 8 && len <= 32
+          ? true // Если длина в пределах диапазона
+          : "Пароль должен быть от 8 до 32 символов"; // Сообщение об ошибке
+      },
+    },
+
+    required: (v: any) => !!v || 'Это поле обязательно к заполнению',
+  }
+
+  mounted(): void {
+    this.initValues()
   }
 
   closeDialog(): void {
@@ -319,16 +366,14 @@ export default class buttonMenu extends Vue {
   }
 
   async exitAccount() {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('number')
-    localStorage.removeItem('firstName')
-    localStorage.removeItem('lastName')
-    localStorage.removeItem('username')
-    localStorage.removeItem('bio')
+    localStorage.clear()
     return await this.$router.push('/auth/login')
   }
 
+  // Изменение личной информации
   async saveChangesOther() {
+
+    // Проверка полей на изменение
     if ((this.model.firstName == this.localModel.firstName) && (this.model.lastName == this.localModel.lastName) &&
       (this.model.username == this.localModel.username) && (this.model.bio == this.localModel.bio)) {
       logger("not changed");
@@ -348,9 +393,9 @@ export default class buttonMenu extends Vue {
       })
       .then((response) => {
         logger(response);
-        localStorage.setItem('firstName', this.model.firstName );
-        localStorage.setItem('lastName', this.model.lastName );
-        localStorage.setItem('username', this.model.username );
+        localStorage.setItem('firstName', this.model.firstName);
+        localStorage.setItem('lastName', this.model.lastName);
+        localStorage.setItem('username', this.model.username);
         localStorage.setItem('bio', this.model.bio);
 
         this.patch = !this.patch;
@@ -361,19 +406,23 @@ export default class buttonMenu extends Vue {
       })
   }
 
+  // Проверка изменения телефона
+  // и включение диалога для подтверждения пароля
   checkNumber() {
-    if(this.model.number == this.localModel.number) {
+    if (this.model.number == this.localModel.number) {
+      logger("not changed number");
       return;
     }
     this.validateForm("validFormOne") && (this.dialog = !this.dialog)
   }
 
+  // запрос на изменение телефона
   async saveChangesNumber() {
 
     await this.$axios.patch("/api/user/change/number", {
-      number: this.model.number,
-      password: this.model.password
-    },
+        number: this.model.number,
+        password: this.model.password
+      },
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -391,10 +440,6 @@ export default class buttonMenu extends Vue {
         logger(error);
       })
 
-  }
-
-  mounted(): void {
-    this.initValues()
   }
 
   validateForm(val: string): boolean {

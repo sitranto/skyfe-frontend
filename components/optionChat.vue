@@ -25,19 +25,22 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+
     </v-menu>
   </div>
 </template>
 <script lang="ts">
 import {Vue, Component, Prop} from 'vue-property-decorator';
-import logger from "../assets/scripts/logger";
+// @ts-ignore
+import logger from "~/assets/scripts/logger";
 
 @Component({})
 export default class optionChat extends Vue {
-  @Prop ({required:true}) chat!: number;
+
+  @Prop({required: true}) chat!: number;
 
   async deleteChat() {
-    await this.$axios.delete(`/api/chat/delete`,{
+    await this.$axios.delete(`/api/chat/delete`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`
       },
@@ -46,20 +49,17 @@ export default class optionChat extends Vue {
       }
     })
       .then((response) => {
-        logger(response);
-        logger(this.chat);
         if (response.data.toString() == `Deleted chat ${this.chat}`) {
-          logger(`Чат ${this.chat} удалён`);
+          logger(`Chat ${this.chat} deleted`);
           this.$router.push('/');
-        }
-        else {
-          logger(`Чат ${this.chat} не удалён`);
+        } else {
+          logger(`Chat ${this.chat} not deleted`);
         }
       })
-    .catch((error) => {
-      logger(error);
-      this.$router.push('/');
-    })
+      .catch((error) => {
+        logger(error);
+        this.$router.push('/');
+      })
   }
 }
 </script>

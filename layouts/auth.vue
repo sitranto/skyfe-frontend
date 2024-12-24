@@ -1,4 +1,5 @@
 <template>
+  <!-- Layout для страниц auth/.. для отображения логотипа в центре -->
   <v-app class="body">
     <v-container>
       <div class="auth d-flex align-center justify-center">

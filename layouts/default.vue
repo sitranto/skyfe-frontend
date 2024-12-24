@@ -51,12 +51,14 @@
         <v-list v-if="dialogBranches.length" dense
                 style="width: 360px; height: 100vh; background-color: white">
           <div class="white mb-2" style=" ">
+
             <!-- Меню для управления -->
-            <div class="d-flex align-center justify-space-between flex-row ml-2"
+            <div class="d-flex align-center justify-space-between flex-row"
               style="height: 53px ; border-bottom: 1px solid gray;">
               <button-menu/>
               <input-find class="mr-7" @createChat="handlerCreateChat"/>
             </div>
+
           </div>
           <v-list-item-group v-model="selectedDialog"
                              color="primary">
@@ -114,6 +116,7 @@
       </div>
     </div>
 
+    <!-- Разметка диалога -->
     <v-dialog v-model="error_dialog"
               width="500">
       <v-card>
@@ -138,6 +141,7 @@
       </v-card>
     </v-dialog>
 
+    <!-- todo что это Олег? -->
     <v-menu v-model="show_menu"
             :position-x="x_menu_pos"
             :position-y="y_menu_pos"
@@ -156,20 +160,22 @@
   </v-app>
 </template>
 <script lang="ts">
+import {reactive} from "vue";
 import {Vue, Component, Watch, Provide} from 'vue-property-decorator';
-import logger from "../assets/scripts/logger";
 import buttonMenu from "../components/buttonMenu.vue";
 import inputFind from "../components/inputFind.vue"
-import {reactive} from "vue";
+// @ts-ignore
+import logger from "~/assets/scripts/logger";
 
 @Component({
   components: {
     buttonMenu,
     inputFind,
-  }
+  },
 })
 export default class Default extends Vue {
 
+  // Передача данный о выбранном диалоге на страницу _id
   @Provide() parentDate = reactive({
     partnerId: null,
     partnerName: '',
@@ -206,10 +212,11 @@ export default class Default extends Vue {
     await this.getDialogIdInsideLink()
   }
 
+  // Проверка на наличие JWT TOKEN
   async checkUserAuth() {
     // Проверяем авторизован ли человек
     if (!(localStorage.getItem('accessToken'))) {
-      localStorage.removeItem('accessToken');
+      localStorage.clear()
       return await this.$router.push('/auth/login')
     }
 
@@ -217,6 +224,7 @@ export default class Default extends Vue {
     this.checkUserLoading = false;
   }
 
+  // Получение чатов
   async getChatList() {
     // Проходим дальше, делаем запрос на
     await this.$axios.get("/api/chat", {
@@ -227,33 +235,19 @@ export default class Default extends Vue {
       // если запрос отработал штатно
       .then((response) => {
         this.dialogBranches = response.data
+        logger("Диалоги получены")
         logger(this.dialogBranches)
       })
-      // в случае, если у нас ошибка
+      // в случае, если у нас ошибка, значит jwt неправильный
       .catch((error) => {
-        logger(`Bearer ${localStorage.getItem('accessToken')}`)
         logger(error)
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('number')
-        localStorage.removeItem('firstName')
-        localStorage.removeItem('lastName')
-        localStorage.removeItem('username')
-        localStorage.removeItem('bio')
+        localStorage.clear()
         this.$router.push('/auth/login')
       })
       // в независимости от исхода запроса, убираем анимацию загрузки
       .finally(() => {
         // заканчиваем анимацию "Скелетона" на диалогах
         this.getContentLoading = false;
-
-        /*// Удалить!!!! СДЕЛАНО ДЛЯ ТЕСТА!!!!
-        this.dialogBranches = [
-          {
-            partnerName: 'KekV',
-            lastMessageContent: 'last message...',
-          }
-        ]*/
-
       })
   }
 
@@ -276,9 +270,7 @@ export default class Default extends Vue {
       return
     }
 
-    // передаём значение в качестве числа
-    //return this.chatId = +currentRoute
-
+    this.selectedDialog = this.dialogBranches.findIndex((dialog: any) => dialog.chatId === currentRoute)
   }
 
   // Показываем диалог по клику
@@ -320,6 +312,7 @@ export default class Default extends Vue {
 }
 </script>
 <style scoped>
+
 .messageListBranch__img img {
   display: block;
   width: 48px;
@@ -339,4 +332,5 @@ export default class Default extends Vue {
   font-size: 13px;
   color: #8a8a8a !important;
 }
+
 </style>

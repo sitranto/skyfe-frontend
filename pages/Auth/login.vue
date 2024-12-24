@@ -6,9 +6,12 @@
             :disabled="loading"
             :loading="loading"
             elevation="0">
+
+      <!-- Блок для инпута -->
       <div class="mt-4">
+        <!-- Ввод телефона -->
         <v-text-field class="custom-input"
-                      label="Phone"
+                      label="Телефон"
                       type="text"
                       v-model="model.number"
                       v-mask="`+7##########`"
@@ -16,34 +19,36 @@
                       outlined/>
       </div>
 
+      <!-- Ввод пароля -->
       <div>
         <v-text-field class="custom-input"
-                      label="Password"
+                      label="Пароль"
                       type="password"
+                      v-model="model.password"
                       color="#8A138C"
                       :rules="[
                       rules.required,
                       //rules.password.rule,
-                      rules.password.minLength(8),
-                      rules.password.maxLength(32)
+                      rules.password.lengthInRange
                       ]"
                       :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showPass ? 'text' : 'password'"
                       @click:append="showPass = !showPass"
                       @keyup.enter="auth"
-                      v-model="model.password"
                       outlined/>
       </div>
+
+      <!-- Поля для кнопок -->
       <div class="auth-actions d-flex align-center justify-center flex-column">
         <div>
           <v-btn
             class="text-none auth-button--outlined"
-            outlined
             color="#8A138C"
             width="150px"
             height="40px"
             @click.prevent="auth"
-          >Войти
+            outlined>
+            Войти
           </v-btn>
         </div>
 
@@ -51,6 +56,8 @@
           <a class="auth-button--text" href="#" @click.prevent="$router.push(`/auth/reg`)">Создать аккаунт</a>
         </div>
       </div>
+
+      <!-- Создание модального окна -->
       <div class="modal" v-show="modal">
         <v-alert
           color="red"
@@ -59,7 +66,7 @@
           outlined
           prominent
           type="error">
-          Неверно введены данные
+          {{ modalValue }}
         </v-alert>
       </div>
     </v-card>
@@ -74,6 +81,7 @@ import logger from "~/assets/scripts/logger";
   layout: "auth"
 })
 export default class login extends Vue {
+
   validForm: boolean = false;
   loading: boolean = false;
   showPass: boolean = false;
@@ -83,7 +91,9 @@ export default class login extends Vue {
     password: ""
   }
 
+  // Переменные для управления модальным окном
   modal: boolean = false
+  modalValue: string = "";
   modalTimer: number = 0
 
   /* rules отвечает за то, как правильно вбиты поля, исходя из них, форма становится валидной либо же нет */
@@ -95,10 +105,12 @@ export default class login extends Vue {
       /* rule: (v: any) =>
        !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
        'Пароль должен содержать заглавную букву, цифру и специальный символ.',*/
-      minLength: (len: any) => (v: any) =>
-        (v || '').length >= (len ?? 8) || `Пароль не может быть меньше ${len} символов`,
-      maxLength: (len: any) => (v: any) =>
-        (v || '').length <= (len ?? 8) || `Пароль не может быть больше ${len} символов`
+      lengthInRange: (v: any) => {
+        const len = (v || '').length; // Если пароль пустой, считаем длину как 0
+        return len >= 8 && len <= 32
+          ? true // Если длина в пределах диапазона
+          : "Пароль должен быть от 8 до 32 символов"; // Сообщение об ошибке
+      },
     },
     required: (v: any) => !!v || 'Это поле обязательно к заполнению',
   }
@@ -116,25 +128,29 @@ export default class login extends Vue {
     // Это сделано для того, чтобы пользователь не смог пустую форму отправить на логин
     // Если валидация успешна, мы пропускаем дальше, нет, ну иди заполняй форму
     logger(this.model);
+
+    // Запрос на вход
     this.validateForm && await this.$axios.post("/api/auth", this.model, {})
       .then((response) => {
         const data = response.data
-        localStorage.setItem("accessToken", data.accessToken);
         logger("jwt token сохранён");
         logger(data.bio)
+        logger("name: " + data.firsName, "secondName: " + data.lastName);
+        localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("number", data.number);
-        logger("name: " + data.firsName,"secondName: " + data.lastName);
         localStorage.setItem("firstName", data.firstName);
         localStorage.setItem("lastName", data.lastName);
         localStorage.setItem("username", data.username);
         if (data.bio != null) {
           localStorage.setItem('bio', data.bio);
         }
+
         this.$router.push("/");
       })
       .catch((error) => {
         logger("error");
         this.modal = true
+        this.modalValue = "Введены неверные данные"
       })
       .finally(() => {
         this.loading = false;
@@ -142,10 +158,12 @@ export default class login extends Vue {
           this.modalTimer += 1
           if (this.modalTimer >= 5) {
             this.modal = false
+            this.modalValue = ""
             clearInterval(interval)
             this.modalTimer = 0
           }
         }, 1000)
+
       })
 
     this.loading = true
@@ -154,6 +172,7 @@ export default class login extends Vue {
     this.loading = false;
   }
 
+  // Для слежения за номером телефона
   @Watch("model.number")
   changeModelPhone() {
     logger(this.model.number)

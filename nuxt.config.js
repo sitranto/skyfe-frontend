@@ -1,9 +1,10 @@
 import colors from 'vuetify/es5/util/colors'
 
 const is_prod = true
+const is_serverProd = false
 
 const port = 8080
-const link = is_prod ? 'http://31.129.98.120' : 'http://localhost'
+const link = is_serverProd ? 'http://31.129.98.120' : 'http://localhost'
 const serverLink = link + ':' + port + '/api/'
 
 const host = is_prod ? '31.129.98.120' : '0.0.0.0'
@@ -69,7 +70,7 @@ export default {
     '/api/': {
       target: serverLink,
       pathRewrite: {'^/api/': ''},
-      cors: true
+      cors: true,
     },
   },
 

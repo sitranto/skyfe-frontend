@@ -11,24 +11,27 @@
 
         <v-form v-model="validForm.one" ref="validFormOne">
           <v-stepper-items>
+            <!-- Первый шаг -->
             <v-stepper-content :step="1" class="ma-0 pa-0">
 
+              <!-- Ввод телефона -->
               <div class="mt-5">
                 <v-text-field class="custom-input"
                               v-mask="`+7##########`"
                               v-model="model.number"
-                              label="Phone"
+                              label="Телефон"
                               type="text"
                               :rules="[rules.required, rules.length(12)]"
                               outlined/>
               </div>
 
+              <!-- Блок кнопок -->
               <v-card-actions class="d-flex justify-center">
                 <v-btn
-                  @click="checkPhoneAndCont"
                   class="d-block text-none auth-button--outlined mt-5 px-7"
                   outlined
                   color="#8A138C"
+                  @click="checkPhoneAndCont"
                   height="45px">
                   Проверка телефона
                 </v-btn>
@@ -40,40 +43,48 @@
 
         <v-form v-model="validForm.two" ref="validFormTwo">
           <v-stepper-items>
+            <!-- Второй шаг -->
             <v-stepper-content :step="2">
 
+              <!-- Ввод имени -->
               <div class="mt-5">
                 <v-text-field class="custom-input"
-                              label="First name"
+                              label="Имя"
                               v-model="model.firstName"
-                              :rules="[rules.required]"
+                              :rules="[rules.required,
+                              rules.lengthName(3,32,false)
+                              ]"
                               type="text"
                               outlined/>
               </div>
 
+              <!-- Ввод фамилии -->
               <div>
                 <v-text-field class="custom-input"
-                              label="Second name"
+                              label="Фамилия (Опционально)"
                               v-model="model.lastName"
-                              :rules="[rules.required]"
+                              :rules="[rules.lengthName(3,32,true)]"
                               type="text"
                               outlined/>
               </div>
 
+              <!-- Ввод юзернейма -->
               <div>
                 <v-text-field class="custom-input"
                               label="Username"
                               v-model="model.username"
-                              :rules="[rules.required]"
+                              :rules="[rules.required,
+                              rules.lengthName(3,32,false)
+                              ]"
                               type="text"
                               outlined/>
               </div>
 
-
+              <!-- Блок кнопок -->
               <v-card-actions class="d-flex justify-center">
                 <v-btn
-                  @click="stepper--"
                   class="d-block text-none auth-button--outlined mt-5 px-7"
+                  @click="stepper--"
                   outlined
                   color="#8A138C"
                   height="45px">
@@ -96,19 +107,20 @@
 
         <v-form v-model="validForm.three" ref="validFormThree">
           <v-stepper-items>
+            <!-- Третий шаг -->
             <v-stepper-content :step="3">
 
+              <!-- Ввод пароля -->
               <div class="mt-5">
                 <v-text-field class="custom-input"
-                              label="Password"
+                              label="Пароль"
                               type="password"
                               color="#8A138C"
                               v-model="model.password"
                               :rules="[
                               rules.required,
                               /*rules.password.rule,*/
-                              rules.password.minLength(8),
-                              rules.password.maxLength(32)
+                              rules.password.lengthInRange
                               ]"
                               :append-icon="showPass.one ? 'mdi-eye' : 'mdi-eye-off'"
                               :type="showPass.one ? 'text' : 'password'"
@@ -116,18 +128,16 @@
                               outlined/>
               </div>
 
+              <!-- Повторение пароля -->
               <div>
                 <v-text-field class="custom-input"
-                              label="Repeat password"
+                              label="Повторение пароля"
                               type="password"
                               color="#8A138C"
                               v-model="passRepeat"
                               :rules="[
                               rules.required,
-                              /*rules.password.rule,*/
-                              rules.password.minLength(8),
-                              rules.password.maxLength(32),
-                              rules.match(model.password)
+                              rules.match(model.password),
                               ]"
                               :append-icon="showPass.two ? 'mdi-eye' : 'mdi-eye-off'"
                               :type="showPass.two ? 'text' : 'password'"
@@ -135,8 +145,8 @@
                               outlined/>
               </div>
 
+              <!-- Блок кнопок -->
               <v-card-actions class="d-flex justify-center">
-
                 <v-btn
                   @click="stepper--"
                   class="d-block text-none auth-button--outlined mt-5 px-7"
@@ -163,12 +173,14 @@
       </v-stepper>
     </v-card>
 
+    <!-- Кнопка возврата на авторизацию -->
     <div class="auth-actions isRegPage d-flex align-center justify-center flex-column">
       <div>
         <a class="auth-button--text" href="#" @click.prevent="$router.push(`/auth/login`)">Войти</a>
       </div>
     </div>
 
+    <!-- Создание модального окна -->
     <div class="modal" v-show="modal">
       <v-alert
         color="red"
@@ -192,6 +204,7 @@ import logger from "~/assets/scripts/logger";
   layout: "auth"
 })
 export default class reg extends Vue {
+
   model: any = {
     number: "+7",
     firstName: "",
@@ -207,20 +220,23 @@ export default class reg extends Vue {
     two: false,
   }
 
+  // Объект для проверки валидации
   validForm: any = {
     one: false,
     two: false,
     three: false,
   };
 
+  // Переменные для степпера
   stepLoading: boolean = false
   stepper: number = 1
 
+  // Переменные для управления модальным окном
   modal: boolean = false
   modalValue: string = ""
   modalTimer: number = 0
 
-
+  // Правила для полей
   rules = {
     match: (match: any) => (v: any) =>
       (!!v && v) === match || "Пароли должны совпадать",
@@ -229,19 +245,32 @@ export default class reg extends Vue {
       (v || "").length >= (len ?? 8) ||
       `Недопустимая длина символов`,
 
+    lengthName: (min: number, max: number, type: boolean) => (v: any) => {
+      const len = (v || '').length; // Если поле пустое, длина равна 0
+      if ( type && len === 0) {
+        return true; // Если поле необязательно и пустое — всё валидно
+      }
+      return len >= min && len <= max
+        ? true
+        : `Разрешенная длина от ${min} до ${max} символов`;
+    },
+
     password: {
       /* rule: (v: any) =>
          !!(v || '').match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/) ||
          'Пароль должен содержать заглавную букву, цифру и специальный символ.',*/
-      minLength: (len: any) => (v: any) =>
-        (v || '').length >= (len ?? 8) || `Пароль не может быть меньше ${len} символов`,
-      maxLength: (len: any) => (v: any) =>
-        (v || '').length <= (len ?? 8) || `Пароль не может быть больше ${len} символов`
+      lengthInRange: (v: any) => {
+        const len = (v || '').length; // Если пароль пустой, считаем длину как 0
+        return len >= 8 && len <= 32
+          ? true // Если длина в пределах диапазона
+          : "Пароль должен быть от 8 до 32 символов"; // Сообщение об ошибке
+      },
     },
 
     required: (v: any) => !!v || "Это поле обязательно к заполнению"
   };
 
+  // Проверка на уникальность телефона
   async checkPhoneAndCont() {
 
     this.validateForm(`validFormOne`) && await this.$axios.post("/api/user/number", {
@@ -249,7 +278,7 @@ export default class reg extends Vue {
       },
       {})
       .then((response) => {
-        logger(response)
+        logger(response.data)
         if (response.data == "OK") {
           this.stepLoading = true
           this.nextStep()
@@ -264,24 +293,15 @@ export default class reg extends Vue {
         logger(error)
       })
       .finally(() => {
-        this.stepLoading = false
-        let interval = setInterval(() => {
-          this.modalTimer += 1
-          if (this.modalTimer >= 5) {
-            this.modal = false
-            this.modalValue = ""
-            clearInterval(interval)
-            this.modalTimer = 0
-          }
-        }, 1000)
+       this.funcModalHide()
       })
 
   }
 
+  // Проверка уникальности username
   async checkUserNameAndCont() {
 
-    this.validateForm(`validFormTwo`) && await this.$axios.post("/api/user/username",
-      {
+    this.validateForm(`validFormTwo`) && await this.$axios.post("/api/user/username", {
         username: this.model.username
       },
       {})
@@ -300,33 +320,23 @@ export default class reg extends Vue {
         logger(error)
       })
       .finally(() => {
-        this.stepLoading = false
-        let interval = setInterval(() => {
-          this.modalTimer += 1
-          if (this.modalTimer >= 5) {
-            this.modal = false
-            clearInterval(interval)
-            this.modalTimer = 0
-          }
-        }, 1000)
+        this.funcModalHide()
       })
   }
 
+  // Запрос на регистрацию аккаунта
   async registration() {
 
     this.validateForm(`validFormThree`) && await this.$axios.post("/api/user", this.model, {})
       .then((response) => {
         const data = response.data
-        localStorage.setItem("accessToken", data.accessToken);
         logger("jwt token сохранён");
-        logger(data.bio)
+        localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("number", data.number);
         localStorage.setItem("firstName", data.firstName);
         localStorage.setItem("lastName", data.lastName);
         localStorage.setItem("username", data.username);
-        if (data.bio != null) {
-          localStorage.setItem('bio', data.bio);
-        }
+
         this.$router.push("/");
       })
       .catch((error) => {
@@ -335,20 +345,26 @@ export default class reg extends Vue {
         logger(error)
       })
       .finally(() => {
-        this.stepLoading = false
-        let interval = setInterval(() => {
-          this.modalTimer += 1
-          if (this.modalTimer >= 5) {
-            this.modal = false
-            clearInterval(interval)
-            this.modalTimer = 0
-          }
-        }, 1000)
+        this.funcModalHide()
       })
   }
 
   nextStep() {
     return this.stepper++;
+  }
+
+  // Функция для исчезновения модального окна
+  funcModalHide () {
+    this.stepLoading = false
+    let interval = setInterval(() => {
+      this.modalTimer += 1
+      if (this.modalTimer >= 5) {
+        this.modal = false
+        this.modalValue = ""
+        clearInterval(interval)
+        this.modalTimer = 0
+      }
+    }, 1000)
   }
 
   @Watch("model.number")

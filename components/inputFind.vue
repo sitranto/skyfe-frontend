@@ -1,28 +1,30 @@
 <template>
   <div class="d-flex flex-row align-items-center">
     <v-text-field
+      v-model="username"
+      label="Поиск"
+      type="text"
       append-icon="mdi-magnify"
       @click:append="search"
       @keyup.enter="search"
       dense
-      v-model="username"
-      label="Поиск"
-      type="text"
-      outlined
       hide-details
-    />
+      outlined/>
   </div>
 </template>
 <script lang="ts">
 import {Vue, Component} from 'vue-property-decorator';
-import logger from "../assets/scripts/logger";
+// @ts-ignore
+import logger from "~/assets/scripts/logger";
 
 @Component({})
 export default class inputFind extends Vue {
 
   username: string = "";
 
+  // Создание чата
   async search() {
+
     this.$axios.post("/api/chat/create", {
       username: this.username
     },
