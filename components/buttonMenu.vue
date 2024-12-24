@@ -227,7 +227,7 @@
         <v-card-title>
           Введите пароль
         </v-card-title>
-        <div>
+        <v-form v-model="validForm.three" ref="validFormThree">
           <v-text-field
             label="Пароль"
             type="text"
@@ -239,7 +239,7 @@
             :append-icon="showPass.one ? 'mdi-eye' : 'mdi-eye-off'"
             :type="showPass.one ? 'text' : 'password'"
             @click:append="showPass.one = !showPass.one"/>
-        </div>
+        </v-form>
         <!-- Блок кнопок -->
         <v-card-actions class="justify-end">
           <v-btn dark
@@ -301,6 +301,7 @@ export default class buttonMenu extends Vue {
   validForm: any = {
     one: false,
     two: false,
+    tree: false,
   };
 
   // Правила для валидации
@@ -419,7 +420,7 @@ export default class buttonMenu extends Vue {
   // запрос на изменение телефона
   async saveChangesNumber() {
 
-    await this.$axios.patch("/api/user/change/number", {
+    this.validateForm("validFormThree") && await this.$axios.patch("/api/user/change/number", {
         number: this.model.number,
         password: this.model.password
       },
@@ -432,6 +433,7 @@ export default class buttonMenu extends Vue {
         logger(response.data.accessToken);
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('number', this.model.number);
+        this.localModel.number = localStorage.getItem('number');
 
         this.model.password = ""
         this.dialog = !this.dialog;

@@ -151,33 +151,34 @@ export default class _id extends Vue {
 
   async sendMessage() {
     let status = false
+    logger(this.message.length)
 
-    if (this.message.length <= 0) {
+    if ((this.message || "").length <= 0) {
       logger("Message is empty")
-      return
+      return status
     }
 
-    await this.$axios.post("/api/message/send", {
-        content: this.message
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          chatId: this.parentDate.chatId
-        }
-      })
-      .then((response) => {
-        logger("Сообщение отправлено")
-        status = true
-        this.message = ""
-      })
-      .catch((error) => {
-        status = false
-        logger(error)
-        this.$router.push('/')
-      })
+      await this.$axios.post("/api/message/send", {
+          content: this.message
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            chatId: this.parentDate.chatId
+          }
+        })
+        .then((response) => {
+          logger("Сообщение отправлено")
+          status = true
+          this.message = ""
+        })
+        .catch((error) => {
+          status = false
+          logger(error)
+          this.$router.push('/')
+        })
 
-    return status
+      return status
   }
 
   async sendMessageAndRefresh() {
